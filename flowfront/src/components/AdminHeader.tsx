@@ -30,6 +30,7 @@ const AdminHeader = () => {
       <Logo href="/">Flowmerce <span>Admin</span></Logo>
       <ContentBox>
         <ContentLink href="/admin/board">게시판</ContentLink>
+        <ContentLink href="/admin/user">유저관리</ContentLink>
       </ContentBox>
       <SessionBox>
         <AdminName>{LoginText}</AdminName>

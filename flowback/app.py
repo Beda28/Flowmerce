@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, board, admin_board
+from routes import auth, board, admin_board, admin_user
 from utils import token
 from db import redis
 
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix='/auth')
 app.include_router(board.router, prefix='/board')
 app.include_router(admin_board.router, prefix='/admin/board', dependencies=[Depends(token.CheckAdmin)])
+app.include_router(admin_user.router, prefix='/admin/user', dependencies=[Depends(token.CheckAdmin)])
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

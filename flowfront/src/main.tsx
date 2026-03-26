@@ -13,6 +13,10 @@ import AdminBoard from "./pages/admin/Board/Board.tsx";
 import AdminBoardInfo from "./pages/admin/Board/BoardInfo.tsx";
 import AdminBoardUpdate from "./pages/admin/Board/BoardUpdate.tsx";
 import AdminBoardDelete from "./pages/admin/Board/BoardDelete.tsx";
+import AdminUser from "./pages/admin/User/User.tsx";
+import AdminUserInfo from "./pages/admin/User/UserInfo.tsx";
+import AdminUserUpdate from "./pages/admin/User/UserUpdate.tsx";
+import AdminUserDelete from "./pages/admin/User/UserDelete.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Router>
@@ -29,6 +33,10 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/admin/board/:id" element={<AdminBoardInfo />} />
       <Route path="/admin/board/update/:id" element={<AdminBoardUpdate />} />
       <Route path="/admin/board/delete/:id" element={<AdminBoardDelete />} />
+      <Route path="/admin/user" element={<AdminUser />} />
+      <Route path="/admin/user/:id" element={<AdminUserInfo />} />
+      <Route path="/admin/user/update/:id" element={<AdminUserUpdate />} />
+      <Route path="/admin/user/delete/:id" element={<AdminUserDelete />} />
     </Routes>
   </Router>
 );
