@@ -1,3 +1,3 @@
-from . import dto_auth
+from . import dto_auth, dto_board
 
-__all__ = ["dto_auth"]
+__all__ = ["dto_auth", "dto_board"]

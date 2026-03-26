@@ -24,6 +24,9 @@ const Header = () => {
   return (
     <HeaderTag>
       <Logo href="/">Flowmerce</Logo>
+      <NavBox>
+        <NavLink href="/board">Community</NavLink>
+      </NavBox>
       <UserActionBox>
         {LoginText === '로그인' ? (
           <>
@@ -63,6 +66,19 @@ const Logo = styled.a`
   font-weight: 900;
   color: #5b73e8;
   text-decoration: none;
+`;
+
+const NavBox = styled.div`
+  display: flex;
+  gap: 24px;
+`;
+
+const NavLink = styled.a`
+  font-size: 15px;
+  font-weight: 600;
+  color: #495057;
+  text-decoration: none;
+  &:hover { color: #5b73e8; }
 `;
 
 const UserActionBox = styled.div`
