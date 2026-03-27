@@ -14,3 +14,31 @@ CREATE TABLE IF NOT EXISTS board (
     date datetime NOT NULL,
     viewcount int NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS product (
+    pid char(36) NOT NULL PRIMARY KEY,
+    name varchar(100) NOT NULL,
+    description varchar(500) NOT NULL,
+    category json NOT NULL,
+    image varchar(255),
+    price int NOT NULL,
+    date datetime NOT NULL,
+    stock int NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cart (
+    cart_id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    uid char(36) NOT NULL,
+    pid char(36) NOT NULL,
+    quantity int NOT NULL,
+    date datetime NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    order_id char(36) NOT NULL PRIMARY KEY,
+    uid char(36) NOT NULL,
+    pid char(36) NOT NULL,
+    quantity int NOT NULL,
+    total_price int NOT NULL,
+    date datetime NOT NULL
+);

@@ -4,9 +4,9 @@ import { logout } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const LoginText = getId() ?? "로그인";
-  const ProfileLink = getId() == 'admin' ? '/admin/user' : LoginText != "로그인" ? '/mypage' : '/login'
-  const RegText = getId() ? "로그아웃" : "회원가입";
+  const userId = getId()
+  const isLoggedIn = userId !== null
+  const ProfileLink = userId === 'admin' ? '/admin/user' : '/mypage'
   const navigate = useNavigate()
 
   const Logout = async (e: React.MouseEvent) => {
@@ -25,18 +25,20 @@ const Header = () => {
     <HeaderTag>
       <Logo href="/">Flowmerce</Logo>
       <NavBox>
-        <NavLink href="/board">Community</NavLink>
+        <NavLink href="/product">상품</NavLink>
+        <NavLink href="/board">커뮤니티</NavLink>
+        <NavLink href="/cart">장바구니</NavLink>
       </NavBox>
       <UserActionBox>
-        {LoginText === '로그인' ? (
+        {!isLoggedIn ? (
           <>
-            <LoginBtn href="/login">{LoginText}</LoginBtn>
-            <RegisterBtn href="/register">{RegText}</RegisterBtn>
+            <LoginBtn href="/login">로그인</LoginBtn>
+            <RegisterBtn href="/register">회원가입</RegisterBtn>
           </>
         ) : (
           <>
-            <MyPageLink href={ProfileLink}>{LoginText}님</MyPageLink>
-            <LogoutBtn onClick={(e) => Logout(e)}>{RegText}</LogoutBtn>
+            <MyPageLink href={ProfileLink}>{userId}님</MyPageLink>
+            <LogoutBtn onClick={(e) => Logout(e)}>로그아웃</LogoutBtn>
           </>
         )}
       </UserActionBox>

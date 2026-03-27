@@ -47,6 +47,7 @@ async def Register(id: str, pw: str, db: AsyncSession):
     
     except Exception as e:
         await db.rollback()
+        print(f"Register error: {e}")
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=400, detail={"code": "REGISTER_FAILED", "msg": "회원가입에 실패했습니다."})

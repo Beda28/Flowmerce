@@ -29,6 +29,7 @@ const AdminHeader = () => {
     <HeaderTag>
       <Logo href="/">Flowmerce <span>Admin</span></Logo>
       <ContentBox>
+        <ContentLink href="/admin/product">상품관리</ContentLink>
         <ContentLink href="/admin/board">게시판</ContentLink>
         <ContentLink href="/admin/user">유저관리</ContentLink>
       </ContentBox>

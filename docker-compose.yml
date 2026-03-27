@@ -5,8 +5,6 @@ services:
     networks:
       - app-network
       - db-network
-    ports:
-      - "8000:8000"
     env_file:
       - .env
     depends_on:
@@ -14,6 +12,7 @@ services:
         condition: service_healthy
     volumes:
       - ./flowback:/app
+      - ./flowback/uploads:/app/uploads
 
   flowfront:
     container_name: flowfront
@@ -22,6 +21,7 @@ services:
       context: ./flowfront
       dockerfile: Dockerfile
     volumes:
+      - ./flowfront:/app
       - flowfront_dist:/data/share
 
   flow-sql:
@@ -68,8 +68,8 @@ services:
       retries: 3
       start_period: 10s
 
-  nginx:
-    container_name: nginx
+  nginx-B:
+    container_name: nginx-B
     image: nginx:latest
     networks:
       - db-network
@@ -81,7 +81,7 @@ services:
       - flowfront
       - flowback
     ports:
-      - "80:80"
+      - "8080:80"
 
 networks:
   app-network:
