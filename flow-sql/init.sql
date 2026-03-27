@@ -3,7 +3,8 @@ use FLOWMERCE;
 CREATE TABLE IF NOT EXISTS users (
     uid char(36) NOT NULL PRIMARY KEY,
     id varchar(10) NOT NULL UNIQUE,
-    pw varchar(255) NOT NULL
+    pw varchar(255) NOT NULL,
+    intro varchar(200)
 );
 
 CREATE TABLE IF NOT EXISTS board (
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS board (
 
 CREATE TABLE IF NOT EXISTS product (
     pid char(36) NOT NULL PRIMARY KEY,
+    seller_uid char(36) NOT NULL,
     name varchar(100) NOT NULL,
     description varchar(500) NOT NULL,
     category json NOT NULL,
@@ -41,4 +43,12 @@ CREATE TABLE IF NOT EXISTS orders (
     quantity int NOT NULL,
     total_price int NOT NULL,
     date datetime NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS chat_rooms (
+    room_id char(36) NOT NULL PRIMARY KEY,
+    pid char(36) NOT NULL,
+    buyer_uid char(36) NOT NULL,
+    seller_uid char(36) NOT NULL,
+    created_at datetime NOT NULL
 );

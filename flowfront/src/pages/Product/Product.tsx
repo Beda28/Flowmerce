@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Product } from "../../types/product";
 import { searchProductList } from "../../api/product";
+import { getId } from "../../utils/token";
 import PageNation from "../../components/PageNation";
 
 const ProductPage = () => {
@@ -16,6 +17,7 @@ const ProductPage = () => {
   const [type, setType] = useState("all");
   const [sort, setSort] = useState("newest");
   const pageCount = Math.ceil(totalcount / 12) || 1;
+  const isLoggedIn = getId() !== null;
 
   const LookProduct = (pid: string) => {
     navigate(`/product/${pid}`);
@@ -43,23 +45,26 @@ const ProductPage = () => {
         <ProductBox>
           <Title>상품</Title>
           <SearchBox>
-            <CateBox onChange={(e) => setType(e.target.value)} value={type}>
-              <CateContent value="all">전체</CateContent>
-              <CateContent value="name">상품명</CateContent>
-              <CateContent value="category">카테고리</CateContent>
-            </CateBox>
-            <SearchInput
-              placeholder="상품 검색..."
-              onChange={(e) => setSearch(e.target.value)}
-              value={search}
-              onKeyDown={(e) => e.key === "Enter" && SearchSubmit()}
-            />
-            <SearchButton onClick={SearchSubmit}>검색</SearchButton>
-            <SortBox onChange={(e) => setSort(e.target.value)} value={sort}>
-              <SortContent value="newest">최신순</SortContent>
-              <SortContent value="price_high">가격높은순</SortContent>
-              <SortContent value="price_low">가격낮은순</SortContent>
-            </SortBox>
+            <LeftBox>
+              <CateBox onChange={(e) => setType(e.target.value)} value={type}>
+                <CateContent value="all">전체</CateContent>
+                <CateContent value="name">상품명</CateContent>
+                <CateContent value="category">카테고리</CateContent>
+              </CateBox>
+              <SearchInput
+                placeholder="상품 검색..."
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+                onKeyDown={(e) => e.key === "Enter" && SearchSubmit()}
+              />
+              <SearchButton onClick={SearchSubmit}>검색</SearchButton>
+              <SortBox onChange={(e) => setSort(e.target.value)} value={sort}>
+                <SortContent value="newest">최신순</SortContent>
+                <SortContent value="price_high">가격높은순</SortContent>
+                <SortContent value="price_low">가격낮은순</SortContent>
+              </SortBox>
+            </LeftBox>
+            {isLoggedIn && <SellButton onClick={() => navigate("/product/write")}>판매하기</SellButton>}
           </SearchBox>
 
           <ProductGrid>
@@ -116,10 +121,28 @@ const Title = styled.h1`
 const SearchBox = styled.div`
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+`;
+
+const LeftBox = styled.div`
+  display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 40px;
+`;
+
+const SellButton = styled.button`
+  padding: 10px 24px;
+  background-color: #5b73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover { background-color: #3b5af2; }
 `;
 
 const CateBox = styled.select`

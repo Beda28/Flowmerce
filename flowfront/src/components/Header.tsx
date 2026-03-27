@@ -27,7 +27,6 @@ const Header = () => {
       <NavBox>
         <NavLink href="/product">상품</NavLink>
         <NavLink href="/board">커뮤니티</NavLink>
-        <NavLink href="/cart">장바구니</NavLink>
       </NavBox>
       <UserActionBox>
         {!isLoggedIn ? (

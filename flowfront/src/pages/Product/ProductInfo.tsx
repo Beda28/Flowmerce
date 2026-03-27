@@ -3,19 +3,34 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import { useEffect, useState } from "react";
 import type { Product } from "../../types/product";
-import { getProductInfo, addToCart } from "../../api/product";
+import { getProductInfo, addToCart, createChatRoom, getSellerInfo } from "../../api/product";
+import { getId } from "../../utils/token";
+
+interface SellerInfo {
+  uid: string;
+  id: string;
+  intro: string | null;
+}
 
 const ProductInfo = () => {
   const { id: pid } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product>();
+  const [seller, setSeller] = useState<SellerInfo | null>(null);
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
+  const userId = getId();
 
   useEffect(() => {
     if (!pid) return;
     const ListSetting = async () => {
       const res = await getProductInfo(pid);
       setProduct(res.data.result);
+      if (res.data.result?.seller_uid) {
+        try {
+          const sellerRes = await getSellerInfo(res.data.result.seller_uid);
+          setSeller(sellerRes.data);
+        } catch {}
+      }
     };
     ListSetting();
   }, [pid]);
@@ -43,6 +58,18 @@ const ProductInfo = () => {
     }
   };
 
+  const handleInquiry = async () => {
+    if (!pid) return;
+    try {
+      const res = await createChatRoom(pid);
+      navigate(`/chat/${res.data.room_id}`);
+    } catch (e: any) {
+      const msg = e.response?.data?.detail?.msg || e.response?.data?.detail || "문의방 생성에 실패했습니다.";
+      alert(msg);
+      if (msg.includes("로그인")) navigate("/login");
+    }
+  };
+
   const decreaseQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
@@ -50,6 +77,8 @@ const ProductInfo = () => {
   const increaseQuantity = () => {
     if (quantity < (product?.stock || 1)) setQuantity(quantity + 1);
   };
+
+  const isSeller = product?.seller_uid === userId;
 
   return (
     <>
@@ -76,6 +105,12 @@ const ProductInfo = () => {
               <InfoValue>{product?.date?.slice(0, 10) || "-"}</InfoValue>
             </ProductInfoRow>
 
+            <SellerSection>
+              <SellerTitle>판매자 정보</SellerTitle>
+              <SellerId>{seller?.id || "정보 없음"}</SellerId>
+              {seller?.intro && <SellerIntro>{seller.intro}</SellerIntro>}
+            </SellerSection>
+
             <ProductInfoRow>
               <InfoLabel>수량</InfoLabel>
               <QuantityBox>
@@ -96,8 +131,16 @@ const ProductInfo = () => {
 
             <ButtonGroup>
               <BackBtn onClick={() => navigate("/product")}>목록으로</BackBtn>
-              <CartBtn onClick={handleAddToCart}>장바구니</CartBtn>
-              <BuyBtn onClick={handleBuyNow}>구매하기</BuyBtn>
+              {!isSeller && (
+                <>
+                  <InquiryBtn onClick={handleInquiry}>문의하기</InquiryBtn>
+                  <CartBtn onClick={handleAddToCart}>장바구니</CartBtn>
+                  <BuyBtn onClick={handleBuyNow}>구매하기</BuyBtn>
+                </>
+              )}
+              {isSeller && (
+                <EditBtn onClick={() => navigate(`/product/update/${pid}`)}>수정하기</EditBtn>
+              )}
             </ButtonGroup>
           </ProductDetails>
         </ProductCard>
@@ -274,6 +317,57 @@ const BuyBtn = styled.button`
   cursor: pointer;
   transition: 0.2s;
   &:hover { background: #3b5af2; }
+`;
+
+const InquiryBtn = styled.button`
+  flex: 1;
+  padding: 16px;
+  background: #ffffff;
+  border: 2px solid #20c997;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #20c997;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover { background: #f0fff8; }
+`;
+
+const EditBtn = styled.button`
+  flex: 2;
+  padding: 16px;
+  background: #5b73e8;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover { background: #3b5af2; }
+`;
+
+const SellerSection = styled.div`
+  padding: 15px 0;
+  margin-top: 15px;
+  border-top: 1px solid #f1f3f5;
+`;
+
+const SellerTitle = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  color: #868e96;
+  margin-bottom: 8px;
+`;
+
+const SellerId = styled.div`
+  font-size: 16px;
+  font-weight: 700;
+  color: #212529;
+`;
+
+const SellerIntro = styled.div`
+  font-size: 14px;
+  color: #495057;
+  margin-top: 5px;
 `;
 
 export default ProductInfo;

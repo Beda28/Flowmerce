@@ -10,6 +10,8 @@ services:
     depends_on:
       flow-sql:
         condition: service_healthy
+      flow-mongo:
+        condition: service_started
     volumes:
       - ./flowback:/app
       - ./flowback/uploads:/app/uploads
@@ -68,6 +70,20 @@ services:
       retries: 3
       start_period: 10s
 
+  flow-mongo:
+    container_name: flow-mongo
+    image: mongo:7
+    networks:
+      - db-network
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+
   nginx-B:
     container_name: nginx-B
     image: nginx:latest
@@ -93,3 +109,4 @@ volumes:
   flowfront_dist:
   db_data:
   redis_data:
+  mongo_data:

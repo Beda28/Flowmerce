@@ -4,6 +4,7 @@ import "./index.css";
 import Login from "./pages/auth/Login.tsx";
 import Index from "./pages/Index.tsx";
 import Register from "./pages/auth/Register.tsx";
+import MyPage from "./pages/MyPage/MyPage.tsx";
 import Board from "./pages/Board/Board.tsx";
 import BoardInfo from "./pages/Board/BoardInfo.tsx";
 import BoardWrite from "./pages/Board/BoardWrite.tsx";
@@ -11,7 +12,10 @@ import BoardUpdate from "./pages/Board/BoardUpdate.tsx";
 import BoardDelete from "./pages/Board/BoardDelete.tsx";
 import Product from "./pages/Product/Product.tsx";
 import ProductInfo from "./pages/Product/ProductInfo.tsx";
+import ProductWrite from "./pages/Product/ProductWrite.tsx";
 import Cart from "./pages/Cart/Cart.tsx";
+import ChatRooms from "./pages/Chat/ChatRooms.tsx";
+import ChatRoom from "./pages/Chat/ChatRoom.tsx";
 import AdminBoard from "./pages/admin/Board/Board.tsx";
 import AdminBoardInfo from "./pages/admin/Board/BoardInfo.tsx";
 import AdminBoardUpdate from "./pages/admin/Board/BoardUpdate.tsx";
@@ -31,9 +35,14 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/mypage" element={<MyPage />} />
       <Route path="/product" element={<Product />} />
       <Route path="/product/:id" element={<ProductInfo />} />
+      <Route path="/product/write" element={<ProductWrite />} />
+      <Route path="/product/update/:id" element={<ProductWrite />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/chat" element={<ChatRooms />} />
+      <Route path="/chat/:roomId" element={<ChatRoom />} />
       <Route path="/board" element={<Board />} />
       <Route path="/board/:id" element={<BoardInfo />} />
       <Route path="/board/write" element={<BoardWrite />} />

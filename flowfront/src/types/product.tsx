@@ -1,5 +1,6 @@
 export interface Product {
   pid: string;
+  seller_uid: string;
   name: string;
   description: string;
   category: string[];

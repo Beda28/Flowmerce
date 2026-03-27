@@ -9,6 +9,7 @@ class User(Base):
     uid = Column(CHAR(36), nullable=False, primary_key=True)
     id = Column(VARCHAR(10), nullable=False, unique=True)
     pw = Column(VARCHAR(255), nullable=False)
+    intro = Column(VARCHAR(200), nullable=True)
 
 class Board(Base):
     __tablename__ = "board"
@@ -24,6 +25,7 @@ class Product(Base):
     __tablename__ = "product"
     
     pid = Column(CHAR(36), nullable=False, primary_key=True)
+    seller_uid = Column(CHAR(36), nullable=False)
     name = Column(VARCHAR(100), nullable=False)
     description = Column(VARCHAR(500), nullable=False)
     category = Column(JSON, nullable=False)
@@ -50,3 +52,12 @@ class Order(Base):
     quantity = Column(INT, nullable=False)
     total_price = Column(INT, nullable=False)
     date = Column(DATETIME, nullable=False)
+
+class ChatRoom(Base):
+    __tablename__ = "chat_rooms"
+    
+    room_id = Column(CHAR(36), nullable=False, primary_key=True)
+    pid = Column(CHAR(36), nullable=False)
+    buyer_uid = Column(CHAR(36), nullable=False)
+    seller_uid = Column(CHAR(36), nullable=False)
+    created_at = Column(DATETIME, nullable=False)
