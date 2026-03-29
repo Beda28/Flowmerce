@@ -1,156 +1,80 @@
-import styled from "styled-components";
-import Header from "../../components/Header";
-import { useEffect, useState } from "react";
-import { getId } from "../../utils/token";
-import { useNavigate, useParams } from "react-router-dom";
-import { boardUpdateSubmit, getBoardInfo } from "../../api/board";
+import { useEffect, useState } from "react"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { boardUpdateSubmit, getBoardInfo } from "@/api/board"
+import { getId } from "@/utils/token"
+import { useNavigate, useParams } from "react-router-dom"
 
 const BoardUpdate = () => {
-  const { id: bid } = useParams();
-  const [title, settitle] = useState("");
-  const [content, setcontent] = useState("");
+  const { id: bid } = useParams<{ id: string }>()
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
+  const userId = getId()
+  const navigate = useNavigate()
 
-  const id = getId();
-  const navigate = useNavigate();
-
-  const submit = async () => {
+  const handleSubmit = async () => {
+    if (!bid) return
     await boardUpdateSubmit(bid, title, content)
-    alert("수정 성공");
-    navigate(`/board`);
-  };
+    alert("수정 성공")
+    navigate("/board")
+  }
 
   useEffect(() => {
-    const ListSetting = async () => {
+    if (!bid) return
+    const loadData = async () => {
       const res = await getBoardInfo(bid)
-      if (id != res.data.result.id) {
-        alert("수정 권한이 없습니다.");
-        return navigate("/board");
+      if (userId !== res.data.result.writer) {
+        alert("수정 권한이 없습니다.")
+        return navigate("/board")
       }
-      settitle(res.data.result.title);
-      setcontent(res.data.result.content);
-    };
-    ListSetting();
-  }, [id, bid, navigate]);
+      setTitle(res.data.result.title)
+      setContent(res.data.result.content)
+    }
+    loadData()
+  }, [bid, userId, navigate])
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Header />
-      <WriteBody>
-        <WriteCard>
-          <FormTitle>게시글 수정</FormTitle>
-          <FormGroup>
-            <InputLabel>제목</InputLabel>
-            <InputTag
-              placeholder="제목을 입력해주세요."
-              onChange={(e) => settitle(e.target.value)}
-              value={title}
-            />
-          </FormGroup>
-          <FormGroup>
-            <InputLabel>내용</InputLabel>
-            <InputArea
-              placeholder="내용을 입력해주세요."
-              onChange={(e) => setcontent(e.target.value)}
-              value={content}
-            />
-          </FormGroup>
-          <ButtonGroup>
-            <CancelBtn onClick={() => navigate(-1)}>취소</CancelBtn>
-            <SubmitBtn onClick={submit}>수정 완료</SubmitBtn>
-          </ButtonGroup>
-        </WriteCard>
-      </WriteBody>
-    </>
-  );
-};
+      <main className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>게시글 수정</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">제목</label>
+              <Input
+                placeholder="제목을 입력해주세요."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">내용</label>
+              <Textarea
+                placeholder="내용을 입력해주세요."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-[300px]"
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => navigate(-1)}>
+                취소
+              </Button>
+              <Button className="flex-1" onClick={handleSubmit}>
+                수정 완료
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
 
-const WriteBody = styled.div`
-  width: 100%;
-  padding: 150px 0 100px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
-
-const WriteCard = styled.div`
-  width: 850px;
-  background: white;
-  padding: 50px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-`;
-
-const FormTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 40px;
-`;
-
-const FormGroup = styled.div`
-  width: 100%;
-  margin-bottom: 25px;
-`;
-
-const InputLabel = styled.label`
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  color: #495057;
-  margin-bottom: 10px;
-`;
-
-const InputTag = styled.input`
-  width: 100%;
-  padding: 15px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-  background: #fcfcfc;
-  box-sizing: border-box;
-  &:focus { outline: none; border-color: #5b73e8; background: white; }
-`;
-
-const InputArea = styled.textarea`
-  width: 100%;
-  height: 400px;
-  padding: 15px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-  background: #fcfcfc;
-  box-sizing: border-box;
-  resize: none;
-  &:focus { outline: none; border-color: #5b73e8; background: white; }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 40px;
-`;
-
-const CancelBtn = styled.button`
-  padding: 14px 30px;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-`;
-
-const SubmitBtn = styled.button`
-  padding: 14px 40px;
-  background: #5b73e8;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #3b5af2; }
-`;
-
-export default BoardUpdate;
+export default BoardUpdate

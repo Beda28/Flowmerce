@@ -1,259 +1,186 @@
-import styled from "styled-components";
-import Header from "../../components/Header";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import type { Product } from "../../types/product";
-import { searchProductList } from "../../api/product";
-import { getId } from "../../utils/token";
-import PageNation from "../../components/PageNation";
+import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
+import { searchProductList } from "@/api/product"
+import { getId } from "@/utils/token"
+import PageNation from "@/components/PageNation"
+import { Search, Plus, ShoppingBag, Tag, TrendingUp, Clock } from "lucide-react"
+import type { Product } from "@/types/product"
 
 const ProductPage = () => {
-  const { page } = useParams();
-  const pageNum = Number(page) || 1;
-  const [totalcount, setTotalCount] = useState(0);
-  const navigate = useNavigate();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState("all");
-  const [sort, setSort] = useState("newest");
-  const pageCount = Math.ceil(totalcount / 12) || 1;
-  const isLoggedIn = getId() !== null;
+  const { page } = useParams()
+  const pageNum = Number(page) || 1
+  const [totalcount, setTotalCount] = useState(0)
+  const navigate = useNavigate()
+  const [products, setProducts] = useState<Product[]>([])
+  const [search, setSearch] = useState("")
+  const [type, setType] = useState("all")
+  const [sort, setSort] = useState("newest")
+  const pageCount = Math.ceil(totalcount / 12) || 1
+  const isLoggedIn = getId() !== null
 
-  const LookProduct = (pid: string) => {
-    navigate(`/product/${pid}`);
-  };
-
-  const SearchSubmit = async () => {
-    const res = await searchProductList(search, type, pageNum, sort);
-    setProducts(res.data.result);
-    setTotalCount(res.data.total_count);
-  };
+  const handleSearch = async () => {
+    const res = await searchProductList(search, type, pageNum, sort)
+    setProducts(res.data.result)
+    setTotalCount(res.data.total_count)
+  }
 
   useEffect(() => {
-    const ListSetting = async () => {
-      const res = await searchProductList("", "all", pageNum, sort);
-      setProducts(res.data.result);
-      setTotalCount(res.data.total_count);
-    };
-    ListSetting();
-  }, [pageNum, sort]);
+    const loadData = async () => {
+      const res = await searchProductList("", "all", pageNum, sort)
+      setProducts(res.data.result)
+      setTotalCount(res.data.total_count)
+    }
+    loadData()
+  }, [pageNum, sort])
 
   return (
-    <>
+    <div className="min-h-screen gradient-bg">
       <Header />
-      <ProductBody>
-        <ProductBox>
-          <Title>상품</Title>
-          <SearchBox>
-            <LeftBox>
-              <CateBox onChange={(e) => setType(e.target.value)} value={type}>
-                <CateContent value="all">전체</CateContent>
-                <CateContent value="name">상품명</CateContent>
-                <CateContent value="category">카테고리</CateContent>
-              </CateBox>
-              <SearchInput
+      <main className="container mx-auto px-6 pt-24 pb-12">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">
+              <span className="gradient-text">상품</span> 둘러보기
+            </h1>
+            <p className="text-muted-foreground">다양한 상품을 만나보세요</p>
+          </div>
+          {isLoggedIn && (
+            <Button 
+              onClick={() => navigate("/product/write")}
+              className="btn-gradient px-6"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              판매하기
+            </Button>
+          )}
+        </div>
+
+        {/* Search Section */}
+        <div className="glass rounded-2xl p-6 mb-10">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex gap-2">
+              <Select 
+                value={type} 
+                onChange={(e) => setType(e.target.value)}
+                className="w-24 input-modern bg-background"
+              >
+                <option value="all">전체</option>
+                <option value="name">상품명</option>
+                <option value="category">카테고리</option>
+              </Select>
+            </div>
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
                 placeholder="상품 검색..."
-                onChange={(e) => setSearch(e.target.value)}
                 value={search}
-                onKeyDown={(e) => e.key === "Enter" && SearchSubmit()}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="pl-11 input-modern"
               />
-              <SearchButton onClick={SearchSubmit}>검색</SearchButton>
-              <SortBox onChange={(e) => setSort(e.target.value)} value={sort}>
-                <SortContent value="newest">최신순</SortContent>
-                <SortContent value="price_high">가격높은순</SortContent>
-                <SortContent value="price_low">가격낮은순</SortContent>
-              </SortBox>
-            </LeftBox>
-            {isLoggedIn && <SellButton onClick={() => navigate("/product/write")}>판매하기</SellButton>}
-          </SearchBox>
+            </div>
+            <Button 
+              onClick={handleSearch}
+              className="btn-gradient"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              검색
+            </Button>
+            <Select 
+              value={sort} 
+              onChange={(e) => setSort(e.target.value)}
+              className="w-24 input-modern bg-background"
+            >
+              <option value="newest">최신순</option>
+              <option value="price_high">가격높은순</option>
+              <option value="price_low">가격낮은순</option>
+            </Select>
+          </div>
+        </div>
 
-          <ProductGrid>
-            {products.length > 0 ? (
-              products.map((product) => (
-                <ProductCard key={product.pid} onClick={() => LookProduct(product.pid)}>
-                  <ProductImage src={product.image ? `/uploads/${product.image}` : undefined} />
-                  <ProductInfo>
-                    <ProductName>{product.name}</ProductName>
-                    <ProductCategory>
-                      {Array.isArray(product.category) 
-                        ? product.category.join(", ") 
-                        : product.category}
-                    </ProductCategory>
-                    <ProductPrice>{product.price.toLocaleString()}원</ProductPrice>
-                  </ProductInfo>
-                </ProductCard>
-              ))
-            ) : (
-              <EmptyState>상품이 존재하지 않습니다.</EmptyState>
-            )}
-          </ProductGrid>
-          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/product"/>
-        </ProductBox>
-      </ProductBody>
-    </>
-  );
-};
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.length > 0 ? (
+            products.map((product, index) => (
+              <div
+                key={product.pid}
+                className="card-elevated overflow-hidden group animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => navigate(`/product/${product.pid}`)}
+              >
+                <div className="aspect-square relative overflow-hidden bg-muted">
+                  {product.image ? (
+                    <>
+                      <img
+                        src={`/uploads/${product.image}`}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-muted">
+                      <ShoppingBag className="h-12 w-12 mb-2 opacity-30" />
+                      <span className="text-xs">No Image</span>
+                    </div>
+                  )}
+                  
+                  {/* Category Badge */}
+                  {product.category && (
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 text-xs font-medium rounded-full glass">
+                        {Array.isArray(product.category) ? product.category[0] : product.category}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-1">
+                    {Array.isArray(product.category) ? product.category.join(", ") : product.category}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <p className="text-xl font-bold gradient-text">
+                      {product.price.toLocaleString()}원
+                    </p>
+                    {product.stock !== undefined && (
+                      <span className="text-xs text-muted-foreground">
+                        재고 {product.stock}개
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full">
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                  <ShoppingBag className="h-10 w-10 text-muted-foreground opacity-50" />
+                </div>
+                <p className="text-lg font-medium text-muted-foreground">상품이 존재하지 않습니다</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">새로운 상품이 곧 등록될 예정입니다</p>
+              </div>
+            </div>
+          )}
+        </div>
 
-const ProductBody = styled.div`
-  width: 100%;
-  padding: 120px 0 60px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
+        {/* Pagination */}
+        <div className="mt-12">
+          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/product" />
+        </div>
+      </main>
+    </div>
+  )
+}
 
-const ProductBox = styled.div`
-  width: 1200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const Title = styled.h1`
-  font-size: 36px;
-  font-weight: 900;
-  color: #212529;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-`;
-
-const SearchBox = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-`;
-
-const LeftBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const SellButton = styled.button`
-  padding: 10px 24px;
-  background-color: #5b73e8;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background-color: #3b5af2; }
-`;
-
-const CateBox = styled.select`
-  padding: 10px 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background: white;
-  font-size: 14px;
-  color: #495057;
-  outline: none;
-  &:focus { border-color: #5b73e8; }
-`;
-
-const CateContent = styled.option``;
-
-const SearchInput = styled.input`
-  width: 250px;
-  padding: 10px 16px;
-  font-size: 14px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  outline: none;
-  &:focus { border-color: #5b73e8; }
-`;
-
-const SearchButton = styled.button`
-  padding: 10px 24px;
-  background-color: #ffffff;
-  color: #5b73e8;
-  border: 1px solid #5b73e8;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background-color: #f8faff; }
-`;
-
-const SortBox = styled.select`
-  padding: 10px 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background: white;
-  font-size: 14px;
-  color: #495057;
-  outline: none;
-  &:focus { border-color: #5b73e8; }
-`;
-
-const SortContent = styled.option``;
-
-const ProductGrid = styled.div`
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-`;
-
-const ProductCard = styled.div`
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  transition: 0.2s;
-  cursor: pointer;
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const ProductImage = styled.img<{ src?: string }>`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: ${props => props.src ? 'none' : 'linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)'};
-`;
-
-const ProductInfo = styled.div`
-  padding: 20px;
-`;
-
-const ProductName = styled.h3`
-  font-size: 18px;
-  font-weight: 700;
-  color: #212529;
-  margin-bottom: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const ProductCategory = styled.p`
-  font-size: 13px;
-  color: #868e96;
-  margin-bottom: 12px;
-`;
-
-const ProductPrice = styled.p`
-  font-size: 18px;
-  font-weight: 700;
-  color: #5b73e8;
-`;
-
-const EmptyState = styled.div`
-  width: 100%;
-  padding: 100px 0;
-  text-align: center;
-  color: #adb5bd;
-  font-size: 16px;
-  grid-column: 1 / -1;
-`;
-
-export default ProductPage;
+export default ProductPage

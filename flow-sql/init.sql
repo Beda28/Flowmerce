@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
     uid char(36) NOT NULL PRIMARY KEY,
     id varchar(10) NOT NULL UNIQUE,
     pw varchar(255) NOT NULL,
-    intro varchar(200)
+    intro varchar(200),
+    balance int NOT NULL DEFAULT 0,
+    role varchar(10) NOT NULL DEFAULT 'user'
 );
 
 CREATE TABLE IF NOT EXISTS board (
@@ -42,7 +44,10 @@ CREATE TABLE IF NOT EXISTS orders (
     pid char(36) NOT NULL,
     quantity int NOT NULL,
     total_price int NOT NULL,
-    date datetime NOT NULL
+    date datetime NOT NULL,
+    status varchar(20) NOT NULL DEFAULT 'pending',
+    status_updated_at datetime,
+    status_updated_by char(36)
 );
 
 CREATE TABLE IF NOT EXISTS chat_rooms (

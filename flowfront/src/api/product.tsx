@@ -106,6 +106,26 @@ export const getOrderList = () => {
   return client.get("/cart/order/list");
 };
 
+export const getOrderDetail = (orderId: string) => {
+  return client.get(`/cart/order/${orderId}`);
+};
+
+export const payOrder = (orderId: string) => {
+  return client.post(`/cart/order/${orderId}/pay`);
+};
+
+export const cancelOrder = (orderId: string) => {
+  return client.post(`/cart/order/${orderId}/cancel`);
+};
+
+export const updateOrderStatus = (orderId: string, status: string) => {
+  return client.patch(`/cart/order/${orderId}/status?status=${status}`);
+};
+
+export const getAdminOrderList = () => {
+  return client.get("/admin/order/list");
+};
+
 export const createChatRoom = (pid: string) => {
   return client.post("/chat/room", { pid: pid });
 };

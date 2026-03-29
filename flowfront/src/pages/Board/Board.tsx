@@ -1,245 +1,140 @@
-import styled from "styled-components";
-import Header from "../../components/Header";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import type { Board } from "../../types/board";
-import { getBoardList, searchBoardList } from "../../api/board";
-import PageNation from "../../components/PageNation";
+import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { getBoardList, searchBoardList } from "@/api/board"
+import PageNation from "@/components/PageNation"
+import { Search, Plus, Eye, FileText, MessageSquare, Calendar } from "lucide-react"
+import type { Board } from "@/types/board"
+import { getId } from "@/utils/token"
 
 const BoardPage = () => {
-  const { page } = useParams();
-  const pageNum = Number(page) || 1;
-  const [totalcount, setTotalCount] = useState(0);
-  const navigate = useNavigate();
-  const [posts, setPosts] = useState<Board[]>([]);
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState("Board.title");
-  const pageCount = Math.ceil(totalcount / 10) || 1;
+  const { page } = useParams()
+  const pageNum = Number(page) || 1
+  const [totalcount, setTotalCount] = useState(0)
+  const navigate = useNavigate()
+  const [boards, setBoards] = useState<Board[]>([])
+  const [search, setSearch] = useState("")
+  const [type, setType] = useState("all")
+  const pageCount = Math.ceil(totalcount / 12) || 1
+  const isLoggedIn = getId() !== null
 
-  const LookPost = (uuid: string) => {
-    navigate(`/board/${uuid}`);
-  };
-
-  const SearchSubmit = async () => {
-    const res = await searchBoardList(search, type, pageNum);
-    setPosts(res.data.result);
-    setTotalCount(res.data.total_count);
-  };
+  const handleSearch = async () => {
+    const res = await searchBoardList(search, type, pageNum)
+    setBoards(res.data.result)
+    setTotalCount(res.data.total_count)
+  }
 
   useEffect(() => {
-    const ListSetting = async () => {
-      const res = await getBoardList(pageNum);
-      setPosts(res.data.result);
-      setTotalCount(res.data.total_count);
-    };
-
-    ListSetting();
-  }, [pageNum]);
+    const loadData = async () => {
+      const res = await getBoardList(pageNum)
+      setBoards(res.data.result)
+      setTotalCount(res.data.total_count)
+    }
+    loadData()
+  }, [pageNum])
 
   return (
-    <>
+    <div className="min-h-screen gradient-bg">
       <Header />
-      <BoardBody>
-        <BoardBox>
-          <SearchBox>
-            <CateBox
-              onChange={(e) => setType(e.target.value)}
+      <main className="container mx-auto px-6 pt-24 pb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+          <div>
+            <h1 className="text-4xl font-bold">
+              <span className="gradient-text">커뮤니티</span>
+            </h1>
+            <p className="text-muted-foreground mt-2">전체 {totalcount}개의 게시글</p>
+          </div>
+          {isLoggedIn && (
+            <Button onClick={() => navigate("/board/write")} className="btn-gradient">
+              <Plus className="h-4 w-4 mr-2" />
+              글쓰기
+            </Button>
+          )}
+        </div>
+
+        <div className="glass rounded-2xl p-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <select
               value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="input-modern bg-background px-4 py-2.5 rounded-lg"
             >
-              <CateContent value={"Board.title"}>제목</CateContent>
-              <CateContent value={"User.id"}>작성자</CateContent>
-            </CateBox>
-            <SearchInput
-              placeholder="게시글 검색..."
-              onChange={(e) => setSearch(e.target.value)}
-              value={search}
-            />
-            <SearchButton onClick={SearchSubmit}>검색</SearchButton>
-            <WriteButton href="/board/write">글쓰기</WriteButton>
-          </SearchBox>
+              <option value="all">전체</option>
+              <option value="title">제목</option>
+              <option value="content">내용</option>
+            </select>
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="게시글 검색..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="pl-11 input-modern"
+              />
+            </div>
+            <Button onClick={handleSearch} className="btn-gradient">
+              <Search className="h-4 w-4 mr-2" />
+              검색
+            </Button>
+          </div>
+        </div>
 
-          <TableWrapper>
-            <BoardHeader>
-              <BoardHeaderItem width={10}>번호</BoardHeaderItem>
-              <BoardHeaderItem width={45}>제목</BoardHeaderItem>
-              <BoardHeaderItem width={20}>작성자</BoardHeaderItem>
-              <BoardHeaderItem width={15}>날짜</BoardHeaderItem>
-              <BoardHeaderItem width={10}>조회</BoardHeaderItem>
-            </BoardHeader>
-            <BoardMain>
-              {posts.length > 0 ? (
-                posts.map((post, index) => (
-                  <BoardMainItem
-                    key={post.bid}
-                    onClick={() => LookPost(post.bid)}
-                  >
-                    <BoardMainText width={10}>{index + 1 + (pageNum - 1) * 10}</BoardMainText>
-                    <BoardMainText width={45} $flex={true} className="title">
-                      {post.title}
-                    </BoardMainText>
-                    <BoardMainText width={20}>{post.id}</BoardMainText>
-                    <BoardMainText width={15}>
-                      {post.date.slice(0, 10)}
-                    </BoardMainText>
-                    <BoardMainText width={10}>{post.viewcount}</BoardMainText>
-                  </BoardMainItem>
-                ))
-              ) : (
-                <EmptyState>게시글이 존재하지 않습니다.</EmptyState>
-              )}
-            </BoardMain>
-          </TableWrapper>
-          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/board"/>
-        </BoardBox>
-      </BoardBody>
-    </>
-  );
-};
+        <div className="space-y-4">
+          {boards.length > 0 ? (
+            boards.map((board, index) => (
+              <div
+                key={board.bid}
+                className="glass rounded-xl p-5 hover:bg-muted/30 cursor-pointer transition-all group animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => navigate(`/board/${board.bid}`)}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+                      <FileText className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold group-hover:text-primary transition-colors line-clamp-1">
+                        {board.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        {board.content}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-shrink-0">
+                    <div className="flex items-center gap-1.5">
+                      <Eye className="h-4 w-4" />
+                      <span>{board.viewcount}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-4 w-4" />
+                      <span>{board.date?.slice(0, 10)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="glass rounded-2xl p-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-8 w-8 text-muted-foreground opacity-50" />
+              </div>
+              <p className="text-lg font-medium text-muted-foreground">게시글이 없습니다</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">새로운 글을 작성해보세요</p>
+            </div>
+          )}
+        </div>
 
-const BoardBody = styled.div`
-  width: 100%;
-  padding: 120px 0 60px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
+        <div className="mt-8">
+          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/board" />
+        </div>
+      </main>
+    </div>
+  )
+}
 
-const BoardBox = styled.div`
-  width: 1100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const SearchBox = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 25px;
-`;
-
-const CateBox = styled.select`
-  padding: 10px 15px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background: white;
-  font-size: 14px;
-  color: #495057;
-  outline: none;
-  &:focus { border-color: #5b73e8; }
-`;
-
-const CateContent = styled.option``;
-
-const SearchInput = styled.input`
-  width: 250px;
-  padding: 10px 16px;
-  font-size: 14px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  outline: none;
-  &:focus { border-color: #5b73e8; }
-`;
-
-const SearchButton = styled.button`
-  padding: 10px 24px;
-  background-color: #ffffff;
-  color: #5b73e8;
-  border: 1px solid #5b73e8;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background-color: #f8faff; }
-`;
-
-const WriteButton = styled.a`
-  padding: 10px 24px;
-  background-color: #5b73e8;
-  color: #ffffff;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: 0.2s;
-  &:hover { background-color: #3b5af2; }
-`;
-
-const TableWrapper = styled.div`
-  width: 100%;
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-`;
-
-const BoardHeader = styled.div`
-  width: 100%;
-  height: 54px;
-  display: flex;
-  background-color: #f1f3f9;
-  border-bottom: 1px solid #e9ecef;
-`;
-
-const BoardHeaderItem = styled.div<{ width: number }>`
-  width: ${({ width }) => width}%;
-  height: 100%;
-  font-size: 14px;
-  font-weight: 700;
-  color: #495057;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const BoardMain = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const BoardMainItem = styled.div`
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #f8f9fa;
-  transition: 0.2s;
-  &:hover {
-    cursor: pointer;
-    background-color: #f8faff;
-    .title { color: #5b73e8; }
-  }
-`;
-
-const BoardMainText = styled.div<{ width: number; $flex?: boolean }>`
-  width: ${({ width }) => width}%;
-  font-size: 15px;
-  color: #495057;
-  display: flex;
-  align-items: center;
-  justify-content: ${({ $flex }) => ($flex ? "flex-start" : "center")};
-  padding: ${({ $flex }) => ($flex ? "0 20px" : "0")};
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  
-  &.title {
-    font-weight: 500;
-    transition: 0.2s;
-  }
-`;
-
-const EmptyState = styled.div`
-  width: 100%;
-  padding: 100px 0;
-  text-align: center;
-  color: #adb5bd;
-  font-size: 16px;
-`;
-
-export default BoardPage;
+export default BoardPage

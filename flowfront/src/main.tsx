@@ -28,6 +28,7 @@ import AdminUser from "./pages/admin/User/User.tsx";
 import AdminUserInfo from "./pages/admin/User/UserInfo.tsx";
 import AdminUserUpdate from "./pages/admin/User/UserUpdate.tsx";
 import AdminUserDelete from "./pages/admin/User/UserDelete.tsx";
+import AdminOrder from "./pages/admin/Order/Order.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Router>
@@ -61,6 +62,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/admin/user/:id" element={<AdminUserInfo />} />
       <Route path="/admin/user/update/:id" element={<AdminUserUpdate />} />
       <Route path="/admin/user/delete/:id" element={<AdminUserDelete />} />
+      <Route path="/admin/order" element={<AdminOrder />} />
     </Routes>
   </Router>
 );

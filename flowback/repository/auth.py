@@ -1,3 +1,4 @@
+import json
 import re
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
@@ -28,7 +29,7 @@ async def Login(id: str, pw: str, db: AsyncSession):
     if not info or not pwd_context.verify(pw, info.pw):
         raise HTTPException(status_code=401, detail={"code": "LOGIN_FAILED", "msg": "아이디 또는 비밀번호가 틀렸습니다."})
     
-    access, refresh = await token.create_tokens(id, str(info.uid))
+    access, refresh = await token.create_tokens(id, str(info.uid), info.role)
     return {"access": access, "refresh": refresh}
 
 async def Register(id: str, pw: str, db: AsyncSession):
@@ -59,7 +60,7 @@ async def logout(payload):
     return {"message": "로그아웃 성공"}
 
 async def getProfile(uid: str, db: AsyncSession):
-    result = await db.execute(select(model.User.uid, model.User.id, model.User.intro).where(model.User.uid == uid))
+    result = await db.execute(select(model.User.uid, model.User.id, model.User.intro, model.User.balance).where(model.User.uid == uid))
     user = result.mappings().first()
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
@@ -99,3 +100,23 @@ async def updateProfile(uid: str, db: AsyncSession, new_id: str = None, new_pw: 
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=500, detail={"code": "SERVER_ERROR", "msg": "프로필 수정에 실패했습니다."})
+
+async def addBalance(uid: str, amount: int, db: AsyncSession):
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail={"code": "INVALID_AMOUNT", "msg": "1원 이상 입력해주세요."})
+    
+    try:
+        result = await db.execute(select(model.User).where(model.User.uid == uid))
+        user = result.scalars().first()
+        if not user:
+            raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+        
+        new_balance = user.balance + amount
+        await db.execute(update(model.User).where(model.User.uid == uid).values(balance=new_balance))
+        await db.commit()
+        
+        return {"message": "잔고 충전 완료", "balance": new_balance}
+    
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail={"code": "SERVER_ERROR", "msg": "잔고充值에 실패했습니다."})

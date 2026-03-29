@@ -1,144 +1,82 @@
-import styled from "styled-components";
-import Header from "../../components/Header";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getChatRooms } from "../../api/product";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import Header from "@/components/Header"
+import { getChatRooms } from "@/api/product"
+import { MessageSquare, Package, ChevronRight } from "lucide-react"
 
 interface ChatRoom {
-  room_id: string;
-  pid: string;
-  product_name: string;
-  image: string | null;
-  price: number;
-  buyer_id: string;
-  created_at: string;
+  room_id: string
+  pid: string
+  product_name: string
+  price: number
+  image: string | null
 }
 
 const ChatRooms = () => {
-  const [rooms, setRooms] = useState<ChatRoom[]>([]);
-  const navigate = useNavigate();
+  const [rooms, setRooms] = useState<ChatRoom[]>([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     const loadRooms = async () => {
-      try {
-        const res = await getChatRooms();
-        setRooms(res.data.result || []);
-      } catch {
-        alert("로그인이 필요합니다.");
-        navigate("/login");
-      }
-    };
-    loadRooms();
-  }, []);
+      const res = await getChatRooms()
+      setRooms(res.data.result || [])
+    }
+    loadRooms()
+  }, [])
 
   return (
-    <>
+    <div className="min-h-screen gradient-bg">
       <Header />
-      <ChatBody>
-        <ChatBox>
-          <Title>문의 목록</Title>
-          <RoomList>
-            {rooms.length > 0 ? (
-              rooms.map(room => (
-                <RoomCard key={room.room_id} onClick={() => navigate(`/chat/${room.room_id}`)}>
-                  <RoomImage src={room.image ? `/uploads/${room.image}` : undefined} />
-                  <RoomInfo>
-                    <RoomProduct>{room.product_name}</RoomProduct>
-                    <RoomPrice>{room.price?.toLocaleString()}원</RoomPrice>
-                    <RoomDate>{room.created_at?.slice(0, 10)}</RoomDate>
-                  </RoomInfo>
-                </RoomCard>
-              ))
-            ) : (
-              <EmptyState>문의 내역이 없습니다.</EmptyState>
-            )}
-          </RoomList>
-        </ChatBox>
-      </ChatBody>
-    </>
-  );
-};
+      <main className="container mx-auto px-6 pt-24 pb-12 max-w-3xl">
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold">
+            <span className="gradient-text">문의 목록</span>
+          </h1>
+          <p className="text-muted-foreground mt-2">전체 {rooms.length}개의 문의</p>
+        </div>
 
-const ChatBody = styled.div`
-  width: 100%;
-  padding: 120px 0 60px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
+        <div className="space-y-4">
+          {rooms.length > 0 ? (
+            rooms.map((room, index) => (
+              <div
+                key={room.room_id}
+                className="glass rounded-xl p-5 hover:bg-muted/30 cursor-pointer transition-all group animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => navigate(`/chat/${room.room_id}`)}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+                    {room.image ? (
+                      <img src={`/uploads/${room.image}`} alt={room.product_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-8 w-8 text-muted-foreground opacity-30" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold group-hover:text-primary transition-colors">
+                      {room.product_name}
+                    </h3>
+                    <p className="gradient-text font-bold mt-1">{room.price?.toLocaleString()}원</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="glass rounded-2xl p-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="h-8 w-8 text-muted-foreground opacity-50" />
+              </div>
+              <p className="text-lg font-medium text-muted-foreground">문의 내역이 없습니다</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">상품 페이지에서 문의할 수 있습니다</p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}
 
-const ChatBox = styled.div`
-  width: 800px;
-`;
-
-const Title = styled.h1`
-  font-size: 28px;
-  font-weight: 900;
-  color: #212529;
-  margin-bottom: 30px;
-`;
-
-const RoomList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-`;
-
-const RoomCard = styled.div`
-  background: white;
-  border-radius: 15px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  transition: 0.2s;
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const RoomImage = styled.img<{ src?: string }>`
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  object-fit: cover;
-  background: ${props => props.src ? "none" : "linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)"};
-`;
-
-const RoomInfo = styled.div`
-  flex: 1;
-`;
-
-const RoomProduct = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-  color: #212529;
-  margin-bottom: 5px;
-`;
-
-const RoomPrice = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: #5b73e8;
-  margin-bottom: 5px;
-`;
-
-const RoomDate = styled.div`
-  font-size: 12px;
-  color: #868e96;
-`;
-
-const EmptyState = styled.div`
-  padding: 60px;
-  text-align: center;
-  color: #adb5bd;
-  font-size: 16px;
-  background: white;
-  border-radius: 15px;
-`;
-
-export default ChatRooms;
+export default ChatRooms

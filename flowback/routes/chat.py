@@ -36,11 +36,32 @@ async def get_messages(room_id: str, payload: dict = Depends(token.CheckLogin)):
 @router.websocket('/ws/{room_id}')
 async def websocket_chat(websocket: WebSocket, room_id: str):
     await websocket.accept()
+    client_id = None
     try:
         while True:
             data = await websocket.receive_text()
-            msg_data = json.loads(data)
-            await chat_repo.saveMessage(room_id, msg_data.get("uid"), msg_data.get("message"))
-            await websocket.send_text(json.dumps({"type": "success"}))
+            try:
+                msg_data = json.loads(data)
+                
+                if msg_data.get("type") == "auth":
+                    client_id = msg_data.get("uid")
+                    await websocket.send_text(json.dumps({"type": "auth_success", "uid": client_id}))
+                    continue
+                
+                uid = msg_data.get("uid")
+                message = msg_data.get("message")
+                
+                if not uid or not message:
+                    await websocket.send_text(json.dumps({"type": "error", "message": "유효하지 않은 데이터입니다."}))
+                    continue
+                    
+                await chat_repo.saveMessage(room_id, uid, message)
+                await websocket.send_text(json.dumps({"type": "success"}))
+            except json.JSONDecodeError:
+                await websocket.send_text(json.dumps({"type": "error", "message": "잘못된 형식의 데이터입니다."}))
+            except Exception as e:
+                await websocket.send_text(json.dumps({"type": "error", "message": "메시지 전송에 실패했습니다."}))
     except WebSocketDisconnect:
+        pass
+    except Exception as e:
         pass

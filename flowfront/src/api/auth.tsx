@@ -17,3 +17,7 @@ export const registerSubmit = (id: string, pw: string) => {
 export const logout = () => {
   return client.post("/auth/logout")
 }
+
+export const addBalance = (amount: number) => {
+  return client.post("/auth/balance", { amount })
+}

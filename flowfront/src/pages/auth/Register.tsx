@@ -1,165 +1,166 @@
-import { useState } from "react";
-import Header from "../../components/Header";
-import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import { registerSubmit } from "../../api/auth";
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import Header from '@/components/Header'
+import { registerSubmit } from '@/api/auth'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Package, UserPlus, User, Lock, CheckCircle } from 'lucide-react'
 
 const Register = () => {
-  const [id, setId] = useState("");
-  const [pw, setPW] = useState("");
-  const navigate = useNavigate();
+  const [id, setId] = useState('')
+  const [pw, setPw] = useState('')
+  const [pwConfirm, setPwConfirm] = useState('')
+  const navigate = useNavigate()
 
-  const auth = async () => {
-    const idRegex = /^[a-zA-Z0-9]{4,10}$/;
-    if (!id.trim() || !pw.trim()) return alert("아이디와 비밀번호를 모두 입력해주세요.");
-    if (!idRegex.test(id)) return alert("아이디는 4~10자의 영문 또는 숫자만 가능합니다.");
-    if (pw.length < 8 || pw.length > 20) return alert("비밀번호는 8~20자 사이여야 합니다.");
+  const handleSubmit = async () => {
+    const idRegex = /^[a-zA-Z0-9]{4,10}$/
+    if (!id.trim() || !pw.trim() || !pwConfirm.trim()) return alert("모든 필드를 입력해주세요.")
+    if (!idRegex.test(id)) return alert("아이디는 4~10자의 영문 또는 숫자만 가능합니다.")
+    if (pw.length < 8 || pw.length > 20) return alert("비밀번호는 8~20자 사이여야 합니다.")
+    if (pw !== pwConfirm) return alert("비밀번호가 일치하지 않습니다.")
 
-    const res = await registerSubmit(id, pw);
-    localStorage.setItem("FM_Access", res.data.access);
-    localStorage.setItem("FM_Refresh", res.data.refresh);
-    alert("회원가입 성공");
-    navigate("/");
-  };
+    const res = await registerSubmit(id, pw)
+    localStorage.setItem("FM_Access", res.data.access)
+    localStorage.setItem("FM_Refresh", res.data.refresh)
+    navigate('/')
+  }
+
+  const pwMatch = pwConfirm && pw === pwConfirm
+  const idValid = id.length >= 4 && id.length <= 10 && /^[a-zA-Z0-9]+$/.test(id)
+  const pwValid = pw.length >= 8 && pw.length <= 20
 
   return (
-    <>
+    <div className="min-h-screen gradient-bg flex flex-col">
       <Header />
-      <RegisterBody>
-        <RegisterBox>
-          <RegisterTitle>Join Flowmerce</RegisterTitle>
-          <RegisterSubtitle>다양한 상품을 만나보세요.</RegisterSubtitle>
-          <InputGroup>
-            <RegisterInput
-              placeholder="사용할 아이디"
-              onChange={(e) => setId(e.target.value)}
-              value={id}
-              maxLength={10}
-            />
-            <RegisterInput
-              placeholder="사용할 비밀번호"
-              onChange={(e) => setPW(e.target.value)}
-              value={pw}
-              type="password"
-              maxLength={20}
-            />
-          </InputGroup>
-          <RegisterButton onClick={auth}>회원가입 시작하기</RegisterButton>
-          <HelperBox>
-            이미 계정이 있으신가요?{" "}
-            <span onClick={() => navigate("/login")}>로그인</span>
-          </HelperBox>
-        </RegisterBox>
-      </RegisterBody>
-    </>
-  );
-};
+      <main className="flex-1 flex items-center justify-center px-6 py-24">
+        <div className="w-full max-w-md">
+          {/* Logo Section */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-2xl blur-xl opacity-50"></div>
+                <div className="relative bg-gradient-to-br from-primary to-accent p-4 rounded-2xl">
+                  <Package className="h-10 w-10 text-white" />
+                </div>
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold gradient-text mb-2">Flowmerce</h1>
+            <p className="text-muted-foreground">새 계정을 만드세요</p>
+          </div>
 
-const RegisterBody = styled.div`
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f8f9fa;
-  box-sizing: border-box;
-`;
+          {/* Register Form */}
+          <div className="glass rounded-2xl p-8">
+            <div className="space-y-6">
+              {/* ID Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  아이디
+                </label>
+                <div className="relative">
+                  <Input
+                    placeholder="4~10자 영문/숫자"
+                    value={id}
+                    onChange={(e) => setId(e.target.value)}
+                    maxLength={10}
+                    className="input-modern h-12 pl-4 pr-10"
+                  />
+                  {idValid && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  )}
+                </div>
+                {id && !idValid && (
+                  <p className="text-xs text-destructive">4~10자의 영문/숫자만 가능합니다</p>
+                )}
+              </div>
 
-const RegisterBox = styled.div`
-  width: 420px;
-  padding: 50px 40px;
-  background-color: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-`;
+              {/* Password Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  비밀번호
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    placeholder="8~20자 비밀번호"
+                    value={pw}
+                    onChange={(e) => setPw(e.target.value)}
+                    maxLength={20}
+                    className="input-modern h-12 pl-4 pr-10"
+                  />
+                  {pwValid && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  )}
+                </div>
+                {pw && !pwValid && (
+                  <p className="text-xs text-destructive">8~20자 사이여야 합니다</p>
+                )}
+              </div>
 
-const RegisterTitle = styled.h1`
-  font-size: 28px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 8px;
-`;
+              {/* Password Confirm Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  비밀번호 확인
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    placeholder="비밀번호 다시 입력"
+                    value={pwConfirm}
+                    onChange={(e) => setPwConfirm(e.target.value)}
+                    maxLength={20}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                    className="input-modern h-12 pl-4 pr-10"
+                  />
+                  {pwMatch && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                  )}
+                </div>
+                {pwConfirm && !pwMatch && (
+                  <p className="text-xs text-destructive">비밀번호가 일치하지 않습니다</p>
+                )}
+              </div>
 
-const RegisterSubtitle = styled.p`
-  font-size: 15px;
-  color: #868e96;
-  margin-bottom: 35px;
-`;
+              {/* Register Button */}
+              <Button 
+                className="w-full h-12 btn-gradient text-base font-semibold" 
+                onClick={handleSubmit}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                회원가입
+              </Button>
+            </div>
 
-const InputGroup = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 25px;
-`;
+            {/* Divider */}
+            <div className="divider-gradient my-6"></div>
 
-const RegisterInput = styled.input`
-  width: 100%;
-  padding: 14px 18px;
-  font-size: 16px;
-  border-radius: 12px;
-  border: 1px solid #dee2e6;
-  background-color: #fcfcfc;
-  box-sizing: border-box;
-  transition: 0.2s;
+            {/* Login Link */}
+            <p className="text-center text-sm text-muted-foreground">
+              이미 계정이 있으신가요?{' '}
+              <Link 
+                to="/login" 
+                className="text-primary hover:text-primary/80 font-semibold transition-colors"
+              >
+                로그인
+              </Link>
+            </p>
+          </div>
 
-  &:focus {
-    outline: none;
-    border-color: #5b73e8;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(91, 115, 232, 0.1);
-  }
+          {/* Back to Home */}
+          <p className="text-center mt-6">
+            <Link 
+              to="/" 
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              홈으로 돌아가기
+            </Link>
+          </p>
+        </div>
+      </main>
+    </div>
+  )
+}
 
-  &::placeholder {
-    color: #adb5bd;
-  }
-`;
-
-const RegisterButton = styled.button`
-  width: 100%;
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  border-radius: 12px;
-  background-color: #5b73e8;
-  color: #ffffff;
-  cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0 4px 12px rgba(91, 115, 232, 0.2);
-
-  &:hover {
-    background-color: #3b5af2;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(91, 115, 232, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const HelperBox = styled.div`
-  margin-top: 25px;
-  font-size: 14px;
-  color: #495057;
-
-  span {
-    color: #5b73e8;
-    font-weight: 700;
-    cursor: pointer;
-    margin-left: 8px;
-    text-decoration: underline;
-
-    &:hover {
-      color: #3b5af2;
-    }
-  }
-`;
-
-export default Register;
+export default Register

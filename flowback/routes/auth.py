@@ -39,3 +39,11 @@ async def get_profile(db: AsyncSession = Depends(engine.get_db), payload: dict =
 async def update_profile(data: ProfileUpdate, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
     uid = payload.get("uuid")
     return await auth.updateProfile(uid, db, data.id, data.pw, data.intro)
+
+class BalanceUpdate(BaseModel):
+    amount: int
+
+@router.post('/balance')
+async def add_balance(data: BalanceUpdate, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
+    uid = payload.get("uuid")
+    return await auth.addBalance(uid, data.amount, db)

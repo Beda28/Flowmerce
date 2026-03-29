@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, board, admin_board, admin_user, product, admin_product, cart, chat
+from routes import auth, board, admin_board, admin_user, admin_order, product, admin_product, cart, chat
 from utils import token
 from db import redis, mongo
 
@@ -41,6 +41,7 @@ app.include_router(chat.router, prefix='/chat')
 app.include_router(admin_board.router, prefix='/admin/board', dependencies=[Depends(token.CheckAdmin)])
 app.include_router(admin_user.router, prefix='/admin/user', dependencies=[Depends(token.CheckAdmin)])
 app.include_router(admin_product.router, prefix='/admin/product', dependencies=[Depends(token.CheckAdmin)])
+app.include_router(admin_order.router, prefix='/admin/order', dependencies=[Depends(token.CheckAdmin)])
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

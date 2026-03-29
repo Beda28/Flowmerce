@@ -7,13 +7,13 @@ import os
 KEY = os.getenv("JWT_KEY")
 AL = "HS256"
 
-async def create_tokens(id: str, uuid: str):
+async def create_tokens(id: str, uuid: str, role: str = "user"):
     access_exp = datetime.utcnow() + timedelta(minutes=30)
-    access_payload = {"id": id, "uuid": str(uuid), "type": "access", "exp": access_exp}
+    access_payload = {"id": id, "uuid": str(uuid), "role": role, "type": "access", "exp": access_exp}
     access_token = jwt.encode(access_payload, KEY, AL)
 
     refresh_exp = datetime.utcnow() + timedelta(days=7)
-    refresh_payload = {"id": id, "uuid": str(uuid), "type": "refresh", "exp": refresh_exp}
+    refresh_payload = {"id": id, "uuid": str(uuid), "role": role, "type": "refresh", "exp": refresh_exp}
     refresh_token = jwt.encode(refresh_payload, KEY, AL)
 
     rd = await redis.get_redis_client()

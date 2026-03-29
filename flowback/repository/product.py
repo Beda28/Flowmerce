@@ -24,7 +24,13 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         result = res.mappings().first()
         if result and result.get("category"):
             result = dict(result)
-            result["category"] = json.loads(result["category"])
+            # SQLAlchemy already converts JSON to Python object, no need to json.loads
+            # but ensure it's a list
+            if isinstance(result["category"], str):
+                import json
+                result["category"] = json.loads(result["category"])
+            elif not isinstance(result["category"], list):
+                result["category"] = []
         return result
     
     if seller_uid:
@@ -40,7 +46,7 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         elif stype == "name":
             query = query.where(model.Product.name.ilike(keyword_pattern))
         elif stype == "category":
-            query = query.where(model.Product.name.ilike(keyword_pattern))
+            query = query.where(model.Product.category.ilike(keyword_pattern))
 
     count = select(func.count()).select_from(query.subquery())
     total_res = await db.execute(count)
@@ -48,11 +54,20 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
      
     query = query.offset(offset).limit(12)
     res = await db.execute(query)
-    results = res.mappings().all()
-    results = [
-        {**dict(row), "category": json.loads(row["category"]) if row.get("category") else []}
-        for row in results
-    ]
+    rows = res.mappings().all()
+    results = []
+    for row in rows:
+        category_data = row["category"]
+        if isinstance(category_data, str):
+            try:
+                category_data = json.loads(category_data)
+            except (json.JSONDecodeError, TypeError):
+                category_data = []
+        elif category_data is None:
+            category_data = []
+        elif not isinstance(category_data, list):
+            category_data = []
+        results.append({**dict(row), "category": category_data})
     return results, total_count
 
 
@@ -108,9 +123,10 @@ async def ProductDelete(pid: str, uid: str, db: AsyncSession):
         product = result.scalars().first()
         if not product:
             raise HTTPException(status_code=404, detail="상품을 찾을 수 없습니다.")
-        if product.seller_uid != uid:
+        if product.seller_uid != uid and uid != "admin":
             raise HTTPException(status_code=403, detail="본인의 상품만 삭제 가능합니다.")
         
+        await db.execute(delete(model.Cart).where(model.Cart.pid == pid))
         await db.delete(product)
         await db.commit()
         return {"message": "삭제 성공"}

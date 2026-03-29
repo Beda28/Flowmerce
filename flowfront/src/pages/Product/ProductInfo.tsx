@@ -1,373 +1,251 @@
-import styled from "styled-components";
-import { useParams, useNavigate } from "react-router-dom";
-import Header from "../../components/Header";
-import { useEffect, useState } from "react";
-import type { Product } from "../../types/product";
-import { getProductInfo, addToCart, createChatRoom, getSellerInfo } from "../../api/product";
-import { getId } from "../../utils/token";
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
+import { getProductInfo, addToCart, createChatRoom, getSellerInfo } from "@/api/product"
+import { getId } from "@/utils/token"
+import { ShoppingCart, MessageSquare, Minus, Plus, Edit, ArrowLeft, User, Package, Calendar, Tag, Shield } from "lucide-react"
+import type { Product } from "@/types/product"
 
 interface SellerInfo {
-  uid: string;
-  id: string;
-  intro: string | null;
+  uid: string
+  id: string
+  intro: string | null
 }
 
 const ProductInfo = () => {
-  const { id: pid } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product>();
-  const [seller, setSeller] = useState<SellerInfo | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const navigate = useNavigate();
-  const userId = getId();
+  const { id: pid } = useParams<{ id: string }>()
+  const [product, setProduct] = useState<Product>()
+  const [seller, setSeller] = useState<SellerInfo | null>(null)
+  const [quantity, setQuantity] = useState(1)
+  const navigate = useNavigate()
+  const userId = getId()
+  const isLoggedIn = userId !== null
 
   useEffect(() => {
-    if (!pid) return;
-    const ListSetting = async () => {
-      const res = await getProductInfo(pid);
-      setProduct(res.data.result);
+    if (!pid) return
+    const loadData = async () => {
+      const res = await getProductInfo(pid)
+      setProduct(res.data.result)
       if (res.data.result?.seller_uid) {
         try {
-          const sellerRes = await getSellerInfo(res.data.result.seller_uid);
-          setSeller(sellerRes.data);
+          const sellerRes = await getSellerInfo(res.data.result.seller_uid)
+          setSeller(sellerRes.data)
         } catch {}
       }
-    };
-    ListSetting();
-  }, [pid]);
+    }
+    loadData()
+  }, [pid])
 
   const handleAddToCart = async () => {
-    if (!pid || !product) return;
-    try {
-      await addToCart(pid, quantity);
-      alert("장바구니에 추가되었습니다.");
-      navigate("/cart");
-    } catch (e) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-    }
-  };
+    if (!pid || !product) return
+    await addToCart(pid, quantity)
+    alert("장바구니에 추가되었습니다.")
+    navigate("/cart")
+  }
 
   const handleBuyNow = async () => {
-    if (!pid || !product) return;
-    try {
-      await addToCart(pid, quantity);
-      navigate("/cart");
-    } catch (e) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-    }
-  };
+    if (!pid || !product) return
+    await addToCart(pid, quantity)
+    navigate("/cart")
+  }
 
   const handleInquiry = async () => {
-    if (!pid) return;
-    try {
-      const res = await createChatRoom(pid);
-      navigate(`/chat/${res.data.room_id}`);
-    } catch (e: any) {
-      const msg = e.response?.data?.detail?.msg || e.response?.data?.detail || "문의방 생성에 실패했습니다.";
-      alert(msg);
-      if (msg.includes("로그인")) navigate("/login");
-    }
-  };
+    if (!pid) return
+    const res = await createChatRoom(pid)
+    navigate(`/chat/${res.data.room_id}`)
+  }
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) setQuantity(quantity - 1);
-  };
-
-  const increaseQuantity = () => {
-    if (quantity < (product?.stock || 1)) setQuantity(quantity + 1);
-  };
-
-  const isSeller = product?.seller_uid === userId;
+  const isSeller = product?.seller_uid === userId
+  const totalPrice = (product?.price || 0) * quantity
 
   return (
-    <>
+    <div className="min-h-screen gradient-bg">
       <Header />
-      <ProductMain>
-        <ProductCard>
-          <ProductImage src={product?.image ? `/uploads/${product.image}` : undefined} />
-          <ProductDetails>
-            <ProductCategory>
-              {Array.isArray(product?.category) 
-                ? product?.category.join(" > ") 
-                : product?.category}
-            </ProductCategory>
-            <ProductName>{product?.name || "상품명을 불러오는 중..."}</ProductName>
-            <ProductPrice>{product?.price?.toLocaleString() || 0}원</ProductPrice>
+      <main className="container mx-auto px-6 pt-24 pb-12">
+        {/* Back Button */}
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/product")} 
+          className="mb-8 hover:bg-muted/50"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          목록으로
+        </Button>
+
+        <div className="grid lg:grid-cols-2 gap-10">
+          {/* Product Image */}
+          <div className="relative">
+            <div className="aspect-square rounded-2xl overflow-hidden glass">
+              {product?.image ? (
+                <img
+                  src={`/uploads/${product.image}`}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-muted">
+                  <Package className="h-16 w-16 mb-3 opacity-30" />
+                  <span>이미지 없음</span>
+                </div>
+              )}
+            </div>
             
-            <ProductInfoRow>
-              <InfoLabel>재고</InfoLabel>
-              <InfoValue>{product?.stock || 0}개</InfoValue>
-            </ProductInfoRow>
-            
-            <ProductInfoRow>
-              <InfoLabel>등록일</InfoLabel>
-              <InfoValue>{product?.date?.slice(0, 10) || "-"}</InfoValue>
-            </ProductInfoRow>
+            {/* Category Badge */}
+            {product?.category && (
+              <div className="absolute top-4 left-4">
+                <span className="px-4 py-2 text-sm font-medium rounded-full glass flex items-center gap-2">
+                  <Tag className="h-3.5 w-3.5" />
+                  {Array.isArray(product.category) ? product.category.join(", ") : product.category}
+                </span>
+              </div>
+            )}
+          </div>
 
-            <SellerSection>
-              <SellerTitle>판매자 정보</SellerTitle>
-              <SellerId>{seller?.id || "정보 없음"}</SellerId>
-              {seller?.intro && <SellerIntro>{seller.intro}</SellerIntro>}
-            </SellerSection>
+          {/* Product Details */}
+          <div className="space-y-6">
+            {/* Title & Price */}
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold">{product?.name || "로딩 중..."}</h1>
+              <p className="text-4xl font-bold gradient-text">
+                {product?.price?.toLocaleString()}원
+              </p>
+            </div>
 
-            <ProductInfoRow>
-              <InfoLabel>수량</InfoLabel>
-              <QuantityBox>
-                <QtyBtn onClick={decreaseQuantity}>-</QtyBtn>
-                <QtyValue>{quantity}</QtyValue>
-                <QtyBtn onClick={increaseQuantity}>+</QtyBtn>
-              </QuantityBox>
-            </ProductInfoRow>
+            {/* Info Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Package className="h-4 w-4" />
+                  <span className="text-sm">재고</span>
+                </div>
+                <p className="text-xl font-semibold">{product?.stock || 0}개</p>
+              </div>
+              <div className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm">등록일</span>
+                </div>
+                <p className="text-xl font-semibold">{product?.date?.slice(0, 10) || "-"}</p>
+              </div>
+            </div>
 
-            <TotalPrice>
-              <TotalLabel>총 금액</TotalLabel>
-              <TotalValue>{(product?.price || 0) * quantity}원</TotalValue>
-            </TotalPrice>
+            {/* Seller Info */}
+            <div className="glass rounded-xl p-5">
+              <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                <User className="h-4 w-4" />
+                <span className="text-sm font-medium">판매자 정보</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <User className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold">{seller?.id || "정보 없음"}</p>
+                  {seller?.intro && (
+                    <p className="text-sm text-muted-foreground">{seller.intro}</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
-            <ProductDesc>
-              {product?.description || "상품 설명이 없습니다."}
-            </ProductDesc>
+            {/* Description */}
+            <div className="glass rounded-xl p-5">
+              <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                <Shield className="h-4 w-4" />
+                <span className="text-sm font-medium">상품 설명</span>
+              </div>
+              <p className="text-foreground/80 leading-relaxed">
+                {product?.description || "상품 설명이 없습니다."}
+              </p>
+            </div>
 
-            <ButtonGroup>
-              <BackBtn onClick={() => navigate("/product")}>목록으로</BackBtn>
-              {!isSeller && (
+            {/* Quantity & Total */}
+            <div className="glass rounded-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-muted-foreground">수량</span>
+                <div className="flex items-center space-x-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="h-10 w-10"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-14 text-center font-bold text-xl">{quantity}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setQuantity(Math.min(product?.stock || 1, quantity + 1))}
+                    disabled={quantity >= (product?.stock || 1)}
+                    className="h-10 w-10"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="divider-gradient my-4"></div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">총 금액</span>
+                <span className="text-3xl font-bold gradient-text">{totalPrice.toLocaleString()}원</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              {isLoggedIn && !isSeller && (
                 <>
-                  <InquiryBtn onClick={handleInquiry}>문의하기</InquiryBtn>
-                  <CartBtn onClick={handleAddToCart}>장바구니</CartBtn>
-                  <BuyBtn onClick={handleBuyNow}>구매하기</BuyBtn>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-14 hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-400 transition-all duration-300 group" 
+                    onClick={handleInquiry}
+                  >
+                    <MessageSquare className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                    문의하기
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-14 hover:bg-green-500/10 hover:border-green-500/50 hover:text-green-400 transition-all duration-300 group" 
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="h-5 w-5 mr-2 group-hover:scale-110 group-hover:animate-bounce transition-transform" />
+                    장바구니
+                  </Button>
+                  <Button 
+                    className="flex-[2] h-14 btn-gradient relative overflow-hidden group" 
+                    onClick={handleBuyNow}
+                  >
+                    <span className="relative z-10">바로 구매</span>
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  </Button>
                 </>
               )}
-              {isSeller && (
-                <EditBtn onClick={() => navigate(`/product/update/${pid}`)}>수정하기</EditBtn>
+              {isLoggedIn && isSeller && (
+                <Button 
+                  className="flex-1 h-14 btn-gradient group" 
+                  onClick={() => navigate(`/product/update/${pid}`)}
+                >
+                  <Edit className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+                  수정하기
+                </Button>
               )}
-            </ButtonGroup>
-          </ProductDetails>
-        </ProductCard>
-      </ProductMain>
-    </>
-  );
-};
+              {!isLoggedIn && (
+                <Button 
+                  className="flex-1 h-14 btn-gradient group" 
+                  onClick={() => navigate("/login")}
+                >
+                  <User className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                  로그인 후 구매하기
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
 
-const ProductMain = styled.div`
-  width: 100%;
-  padding: 120px 0 100px;
-  background-color: #f8f9fa;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-`;
-
-const ProductCard = styled.div`
-  width: 1000px;
-  background: white;
-  border-radius: 20px;
-  padding: 50px;
-  display: flex;
-  gap: 50px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-`;
-
-const ProductImage = styled.img<{ src?: string }>`
-  width: 400px;
-  height: 400px;
-  object-fit: cover;
-  background: ${props => props.src ? 'none' : 'linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)'};
-  border-radius: 15px;
-  flex-shrink: 0;
-`;
-
-const ProductDetails = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const ProductCategory = styled.p`
-  font-size: 14px;
-  color: #868e96;
-  margin-bottom: 10px;
-`;
-
-const ProductName = styled.h1`
-  font-size: 32px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 20px;
-`;
-
-const ProductPrice = styled.p`
-  font-size: 36px;
-  font-weight: 800;
-  color: #5b73e8;
-  margin-bottom: 30px;
-`;
-
-const ProductInfoRow = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f3f5;
-`;
-
-const InfoLabel = styled.span`
-  width: 100px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #868e96;
-`;
-
-const InfoValue = styled.span`
-  font-size: 15px;
-  color: #212529;
-`;
-
-const ProductDesc = styled.p`
-  font-size: 16px;
-  line-height: 1.8;
-  color: #495057;
-  margin-top: 30px;
-  flex: 1;
-  white-space: pre-wrap;
-`;
-
-const QuantityBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-`;
-
-const QtyBtn = styled.button`
-  width: 36px;
-  height: 36px;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background: white;
-  font-size: 18px;
-  cursor: pointer;
-  &:hover { background: #f8f9fa; }
-`;
-
-const QtyValue = styled.span`
-  font-size: 18px;
-  font-weight: 700;
-  width: 40px;
-  text-align: center;
-`;
-
-const TotalPrice = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 15px 0;
-  margin-top: 10px;
-`;
-
-const TotalLabel = styled.span`
-  width: 100px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #495057;
-`;
-
-const TotalValue = styled.span`
-  font-size: 24px;
-  font-weight: 800;
-  color: #5b73e8;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 15px;
-  margin-top: 40px;
-`;
-
-const BackBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #495057;
-  cursor: pointer;
-  &:hover { background: #e9ecef; }
-`;
-
-const CartBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: #ffffff;
-  border: 2px solid #5b73e8;
-  border-radius: 10px;
-  font-weight: 700;
-  color: #5b73e8;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #f8faff; }
-`;
-
-const BuyBtn = styled.button`
-  flex: 2;
-  padding: 16px;
-  background: #5b73e8;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #3b5af2; }
-`;
-
-const InquiryBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: #ffffff;
-  border: 2px solid #20c997;
-  border-radius: 10px;
-  font-weight: 700;
-  color: #20c997;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #f0fff8; }
-`;
-
-const EditBtn = styled.button`
-  flex: 2;
-  padding: 16px;
-  background: #5b73e8;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #3b5af2; }
-`;
-
-const SellerSection = styled.div`
-  padding: 15px 0;
-  margin-top: 15px;
-  border-top: 1px solid #f1f3f5;
-`;
-
-const SellerTitle = styled.div`
-  font-size: 13px;
-  font-weight: 600;
-  color: #868e96;
-  margin-bottom: 8px;
-`;
-
-const SellerId = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-  color: #212529;
-`;
-
-const SellerIntro = styled.div`
-  font-size: 14px;
-  color: #495057;
-  margin-top: 5px;
-`;
-
-export default ProductInfo;
+export default ProductInfo

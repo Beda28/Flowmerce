@@ -1,128 +1,62 @@
-import styled from "styled-components";
-import AdminHeader from "../../../components/AdminHeader";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { adminUserUpdateSubmit, getUserInfo } from "../../../api/user";
+import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import AdminHeader from "@/components/AdminHeader"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { adminUserUpdateSubmit, getUserInfo } from "@/api/user"
 
 const AdminUserUpdate = () => {
-  const { id: uid } = useParams<{ id: string }>();
-  const [id, setId] = useState("");
-  const navigate = useNavigate();
+  const { id: uid } = useParams<{ id: string }>()
+  const [id, setId] = useState("")
+  const navigate = useNavigate()
 
-  const submit = async () => {
-    if (!uid) return;
-    await adminUserUpdateSubmit(uid, id);
-    alert("수정 성공");
-    navigate(`/admin/user`);
-  };
+  const handleSubmit = async () => {
+    if (!uid) return
+    await adminUserUpdateSubmit(uid, id)
+    alert("수정 성공")
+    navigate("/admin/user")
+  }
 
   useEffect(() => {
-    if (!uid) return;
-    const ListSetting = async () => {
-      const res = await getUserInfo(uid);
-      setId(res.data.result.id);
-    };
-    ListSetting();
-  }, [uid]);
+    if (!uid) return
+    const loadData = async () => {
+      const res = await getUserInfo(uid)
+      setId(res.data.result.id)
+    }
+    loadData()
+  }, [uid])
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <AdminHeader />
-      <WriteBody>
-        <WriteCard>
-          <FormTitle>유저 정보 수정</FormTitle>
-          <FormGroup>
-            <InputLabel>아이디</InputLabel>
-            <InputTag
-              placeholder="변경할 아이디를 입력해주세요."
-              onChange={(e) => setId(e.target.value)}
-              value={id}
-            />
-          </FormGroup>
-          <ButtonGroup>
-            <CancelBtn onClick={() => navigate(-1)}>취소</CancelBtn>
-            <SubmitBtn onClick={submit}>수정 완료</SubmitBtn>
-          </ButtonGroup>
-        </WriteCard>
-      </WriteBody>
-    </>
-  );
-};
+      <main className="container mx-auto px-4 pt-24 pb-12 max-w-md">
+        <Card>
+          <CardHeader>
+            <CardTitle>유저 정보 수정</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">아이디</label>
+              <Input
+                placeholder="변경할 아이디를 입력해주세요."
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => navigate(-1)}>
+                취소
+              </Button>
+              <Button className="flex-1" onClick={handleSubmit}>
+                수정 완료
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
 
-const WriteBody = styled.div`
-  width: 100%;
-  padding: 150px 0 100px;
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-`;
-
-const WriteCard = styled.div`
-  width: 500px;
-  background: white;
-  padding: 50px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-`;
-
-const FormTitle = styled.h2`
-  font-size: 24px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 40px;
-`;
-
-const FormGroup = styled.div`
-  width: 100%;
-  margin-bottom: 25px;
-`;
-
-const InputLabel = styled.label`
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
-  color: #495057;
-  margin-bottom: 10px;
-`;
-
-const InputTag = styled.input`
-  width: 100%;
-  padding: 15px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-  background: #fcfcfc;
-  box-sizing: border-box;
-  &:focus { outline: none; border-color: #5b73e8; background: white; }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 40px;
-`;
-
-const CancelBtn = styled.button`
-  padding: 14px 30px;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-`;
-
-const SubmitBtn = styled.button`
-  padding: 14px 40px;
-  background: #5b73e8;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-  &:hover { background: #3b5af2; }
-`;
-
-export default AdminUserUpdate;
+export default AdminUserUpdate

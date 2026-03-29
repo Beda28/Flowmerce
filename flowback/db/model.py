@@ -10,6 +10,8 @@ class User(Base):
     id = Column(VARCHAR(10), nullable=False, unique=True)
     pw = Column(VARCHAR(255), nullable=False)
     intro = Column(VARCHAR(200), nullable=True)
+    balance = Column(INT, nullable=False, default=0)
+    role = Column(VARCHAR(10), nullable=False, default="user")
 
 class Board(Base):
     __tablename__ = "board"
@@ -52,6 +54,9 @@ class Order(Base):
     quantity = Column(INT, nullable=False)
     total_price = Column(INT, nullable=False)
     date = Column(DATETIME, nullable=False)
+    status = Column(VARCHAR(20), nullable=False, default="pending")
+    status_updated_at = Column(DATETIME, nullable=True)
+    status_updated_by = Column(CHAR(36), nullable=True)
 
 class ChatRoom(Base):
     __tablename__ = "chat_rooms"

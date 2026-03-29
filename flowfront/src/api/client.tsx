@@ -1,7 +1,9 @@
 import axios from "axios";
 
+let isRefreshing = false;
+
 const client = axios.create({
-  baseURL: `http://${import.meta.env.VITE_HOST_URL}/api`,
+  baseURL: import.meta.env.VITE_HOST_URL ? `http://${import.meta.env.VITE_HOST_URL}/api` : "/api",
 });
 
 client.interceptors.request.use(
@@ -20,18 +22,25 @@ client.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const errorDetail = error.response?.data?.detail;
+    const status = error.response?.status;
 
     if (
-      error.response?.status === 401 && 
+      status === 401 && 
       errorDetail?.code === "TOKEN_EXPIRED" && 
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
 
+      if (isRefreshing) {
+        return Promise.reject(error);
+      }
+      isRefreshing = true;
+
       try {
         const refreshToken = localStorage.getItem("FM_Refresh");
-
-        const res = await axios.post(`http://${import.meta.env.VITE_HOST_URL}/api/auth/refresh`, {
+        const baseURL = import.meta.env.VITE_HOST_URL ? `http://${import.meta.env.VITE_HOST_URL}` : "";
+        
+        const res = await axios.post(`${baseURL}/api/auth/refresh`, {
           refresh_token: refreshToken,
         });
 
@@ -39,21 +48,23 @@ client.interceptors.response.use(
         localStorage.setItem("FM_Access", newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        isRefreshing = false;
         return client(originalRequest);
       } catch (refreshError) {
-        if (axios.isAxiosError(refreshError)) {
-          const msg = refreshError.response?.data?.detail?.msg || "세션이 만료되었습니다. 다시 로그인하세요.";
-          alert(msg);
-        } else alert("알 수 없는 오류가 발생했습니다.");
+        isRefreshing = false;
         localStorage.removeItem("FM_Access");
         localStorage.removeItem("FM_Refresh");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
-    } if (error) {
-      const msg = error.response?.data?.detail?.msg;
-      alert(msg);
     }
+    
+    if (status === 401 && errorDetail?.msg) {
+      if (!originalRequest._retry) {
+        alert(errorDetail.msg);
+      }
+    }
+    
     return Promise.reject(error);
   }
 );

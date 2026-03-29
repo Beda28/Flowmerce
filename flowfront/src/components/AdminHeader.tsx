@@ -1,126 +1,88 @@
-import styled from "styled-components";
-import { getId } from "../utils/token";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../api/auth";
+import { getId } from "../utils/token"
+import { useNavigate, Link } from "react-router-dom"
+import { logout } from "../api/auth"
+import { Button } from "./ui/button"
+import { Package, Users, FileText, Settings, ExternalLink, Shield, LogOut, ShoppingCart } from "lucide-react"
 
 const AdminHeader = () => {
-  const LoginText = getId();
-  const RegText = "로그아웃";
-  const navigate = useNavigate();
+  const userId = getId()
+  const navigate = useNavigate()
 
-    const Logout = async (e: React.MouseEvent) => {
-      e.preventDefault()
-      await logout()
-      localStorage.removeItem("FM_Access")
-      localStorage.removeItem("FM_Refresh")
-      alert("로그아웃 성공")
-      navigate('/')
-    };
+  if (userId !== 'admin') {
+    navigate("/")
+    return null
+  }
 
-  useEffect(() => {
-    if (getId() != "admin") {
-      alert("권한이 없습니다.");
-      navigate("/");
-    }
-  }, [navigate]);
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    await logout()
+    localStorage.removeItem("FM_Access")
+    localStorage.removeItem("FM_Refresh")
+    navigate('/')
+  }
+
+  const navItems = [
+    { href: "/admin/product", label: "상품관리", icon: Package },
+    { href: "/admin/board", label: "게시판", icon: FileText },
+    { href: "/admin/user", label: "유저관리", icon: Users },
+    { href: "/admin/order", label: "거래관리", icon: ShoppingCart },
+  ]
 
   return (
-    <HeaderTag>
-      <Logo href="/">Flowmerce <span>Admin</span></Logo>
-      <ContentBox>
-        <ContentLink href="/admin/product">상품관리</ContentLink>
-        <ContentLink href="/admin/board">게시판</ContentLink>
-        <ContentLink href="/admin/user">유저관리</ContentLink>
-      </ContentBox>
-      <SessionBox>
-        <AdminName>{LoginText}</AdminName>
-        <LogoutButton onClick={(e) => Logout(e)}>{RegText}</LogoutButton>
-      </SessionBox>
-    </HeaderTag>
-  );
-};
+    <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <div className="relative bg-gradient-to-br from-amber-500 to-orange-500 p-2 rounded-lg">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+              Admin
+            </span>
+          </Link>
+          <Link 
+            to="/" 
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/50"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            메인 사이트
+          </Link>
+        </div>
 
-const HeaderTag = styled.header`
-  width: 100%;
-  padding: 0 40px;
-  height: 70px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  background-color: #1a1d23;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-`;
+        <nav className="hidden md:flex items-center space-x-1">
+          {navItems.map(item => (
+            <a 
+              key={item.href}
+              href={item.href} 
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all"
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-const Logo = styled.a`
-  font-size: 22px;
-  font-weight: 800;
-  color: #ffffff;
-  text-decoration: none;
-  letter-spacing: -0.5px;
-  
-  span {
-    color: #5b73e8;
-    font-size: 14px;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-`;
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Settings className="h-4 w-4 text-amber-400" />
+            <span className="text-sm font-medium text-amber-400">{userId}</span>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleLogout}
+            className="hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4 mr-1" />
+            로그아웃
+          </Button>
+        </div>
+      </div>
+    </header>
+  )
+}
 
-const ContentBox = styled.nav`
-  display: flex;
-  align-items: center;
-  gap: 30px;
-`;
-
-const ContentLink = styled.a`
-  font-size: 15px;
-  font-weight: 600;
-  color: #adb5bd;
-  text-decoration: none;
-  transition: 0.2s;
-
-  &:hover {
-    color: #ffffff;
-  }
-`;
-
-const SessionBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-`;
-
-const AdminName = styled.span`
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 4px;
-`;
-
-const LogoutButton = styled.button`
-  background: none;
-  border: 1px solid #495057;
-  color: #adb5bd;
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-
-  &:hover {
-    background-color: #ff4d4f;
-    border-color: #ff4d4f;
-    color: white;
-  }
-`;
-
-export default AdminHeader;
+export default AdminHeader

@@ -18,13 +18,13 @@ services:
 
   flowfront:
     container_name: flowfront
-    command: sh -c "cp -r /app/dist/* /data/share/"
     build:
       context: ./flowfront
       dockerfile: Dockerfile
-    volumes:
-      - ./flowfront:/app
-      - flowfront_dist:/data/share
+    networks:
+      - app-network
+    expose:
+      - "3000"
 
   flow-sql:
     container_name: flow-sql

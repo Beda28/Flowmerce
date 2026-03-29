@@ -17,3 +17,7 @@ export const adminUserUpdateSubmit = (uid: string, id: string) => {
 export const adminUserDeleteSubmit = (uid: string) => {
   return client.delete(`/admin/user/${uid}`);
 };
+
+export const adminUpdateBalance = (uid: string, amount: number) => {
+  return client.post(`/admin/user/${uid}/balance`, { amount });
+};

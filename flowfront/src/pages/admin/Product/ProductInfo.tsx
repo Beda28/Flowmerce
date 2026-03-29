@@ -1,187 +1,93 @@
-import styled from "styled-components";
-import { useParams, useNavigate } from "react-router-dom";
-import AdminHeader from "../../../components/AdminHeader";
-import { useEffect, useState } from "react";
-import type { Product } from "../../../types/product";
-import { getProductInfo } from "../../../api/product";
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import AdminHeader from "@/components/AdminHeader"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { getProductInfo } from "@/api/product"
+import { Package } from "lucide-react"
+
+interface Product {
+  pid: string
+  name: string
+  description: string
+  category: string[]
+  image: string | null
+  price: number
+  date: string
+  stock: number
+}
 
 const AdminProductInfo = () => {
-  const { id: pid } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product>();
-  const navigate = useNavigate();
+  const { id: pid } = useParams<{ id: string }>()
+  const [product, setProduct] = useState<Product>()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    if (!pid) return;
-    const ListSetting = async () => {
-      const res = await getProductInfo(pid);
-      setProduct(res.data.result);
-    };
-    ListSetting();
-  }, [pid]);
+    if (!pid) return
+    const loadData = async () => {
+      const res = await getProductInfo(pid)
+      setProduct(res.data.result)
+    }
+    loadData()
+  }, [pid])
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <AdminHeader />
-      <ProductMain>
-        <ProductCard>
-          <ProductImage src={product?.image ? `/uploads/${product.image}` : undefined} />
-          <ProductDetails>
-            <ProductCategory>
-              {Array.isArray(product?.category) 
-                ? product?.category.join(" > ") 
-                : product?.category}
-            </ProductCategory>
-            <ProductName>{product?.name || "상품명을 불러오는 중..."}</ProductName>
-            <ProductPrice>{product?.price?.toLocaleString() || 0}원</ProductPrice>
-            
-            <ProductInfoRow>
-              <InfoLabel>재고</InfoLabel>
-              <InfoValue>{product?.stock || 0}개</InfoValue>
-            </ProductInfoRow>
-            
-            <ProductInfoRow>
-              <InfoLabel>등록일</InfoLabel>
-              <InfoValue>{product?.date?.slice(0, 10) || "-"}</InfoValue>
-            </ProductInfoRow>
+      <main className="container mx-auto px-4 pt-24 pb-12">
+        <Card className="max-w-4xl mx-auto">
+          <CardContent className="p-6">
+            <div className="flex gap-8">
+              <div className="w-64 h-64 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                {product?.image ? (
+                  <img src={`/uploads/${product.image}`} alt={product.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-1 space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {Array.isArray(product?.category) ? product?.category.join(" > ") : product?.category}
+                  </p>
+                  <h1 className="text-2xl font-bold mt-1">{product?.name || "상품명을 불러오는 중..."}</h1>
+                  <p className="text-xl font-bold text-primary mt-2">{product?.price?.toLocaleString() || 0}원</p>
+                </div>
 
-            <ProductDesc>
-              {product?.description || "상품 설명이 없습니다."}
-            </ProductDesc>
+                <div className="flex gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">재고: </span>
+                    <span className="font-medium">{product?.stock || 0}개</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">등록일: </span>
+                    <span className="font-medium">{product?.date?.slice(0, 10) || "-"}</span>
+                  </div>
+                </div>
 
-            <ButtonGroup>
-              <BackBtn onClick={() => navigate("/admin/product")}>목록으로</BackBtn>
-              <EditBtn onClick={() => navigate(`/admin/product/update/${product?.pid}`)}>수정</EditBtn>
-              <DeleteBtn onClick={() => navigate(`/admin/product/delete/${product?.pid}`)}>삭제</DeleteBtn>
-            </ButtonGroup>
-          </ProductDetails>
-        </ProductCard>
-      </ProductMain>
-    </>
-  );
-};
+                <p className="text-muted-foreground">{product?.description || "상품 설명이 없습니다."}</p>
 
-const ProductMain = styled.div`
-  width: 100%;
-  padding: 120px 0 100px;
-  background-color: #f8f9fa;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-`;
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" onClick={() => navigate("/admin/product")}>
+                    목록으로
+                  </Button>
+                  <Button onClick={() => navigate(`/admin/product/update/${product?.pid}`)}>
+                    수정
+                  </Button>
+                  <Button variant="destructive" onClick={() => navigate(`/admin/product/delete/${product?.pid}`)}>
+                    삭제
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
 
-const ProductCard = styled.div`
-  width: 1000px;
-  background: white;
-  border-radius: 20px;
-  padding: 50px;
-  display: flex;
-  gap: 50px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-`;
-
-const ProductImage = styled.img<{ src?: string }>`
-  width: 400px;
-  height: 400px;
-  object-fit: cover;
-  background: ${props => props.src ? "none" : "linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%)"};
-  border-radius: 15px;
-  flex-shrink: 0;
-`;
-
-const ProductDetails = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-`;
-
-const ProductCategory = styled.p`
-  font-size: 14px;
-  color: #868e96;
-  margin-bottom: 10px;
-`;
-
-const ProductName = styled.h1`
-  font-size: 32px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 20px;
-`;
-
-const ProductPrice = styled.p`
-  font-size: 36px;
-  font-weight: 800;
-  color: #5b73e8;
-  margin-bottom: 30px;
-`;
-
-const ProductInfoRow = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f3f5;
-`;
-
-const InfoLabel = styled.span`
-  width: 100px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #868e96;
-`;
-
-const InfoValue = styled.span`
-  font-size: 15px;
-  color: #212529;
-`;
-
-const ProductDesc = styled.p`
-  font-size: 16px;
-  line-height: 1.8;
-  color: #495057;
-  margin-top: 30px;
-  flex: 1;
-  white-space: pre-wrap;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 15px;
-  margin-top: 40px;
-`;
-
-const BackBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #495057;
-  cursor: pointer;
-  &:hover { background: #e9ecef; }
-`;
-
-const EditBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: #5b73e8;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  &:hover { background: #3b5af2; }
-`;
-
-const DeleteBtn = styled.button`
-  flex: 1;
-  padding: 16px;
-  background: white;
-  border: 1px solid #ff4d4f;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #ff4d4f;
-  cursor: pointer;
-  &:hover { background: #fff1f0; }
-`;
-
-export default AdminProductInfo;
+export default AdminProductInfo

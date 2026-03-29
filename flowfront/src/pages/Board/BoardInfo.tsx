@@ -1,192 +1,75 @@
-import styled from "styled-components";
-import { useParams, useNavigate } from "react-router-dom";
-import Header from "../../components/Header";
-import { useEffect, useState } from "react";
-import { getId } from "../../utils/token"
-import type { Board } from "../../types/board";
-import { getBoardInfo } from "../../api/board";
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import Header from "@/components/Header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getBoardInfo } from "@/api/board"
+import { getId } from "@/utils/token"
+import { Edit, Trash2, Eye, Calendar } from "lucide-react"
+import type { Board } from "@/types/board"
 
 const BoardInfo = () => {
-  const { id: bid } = useParams();
-  const [posts, setPosts] = useState<Board>();
-  const id = getId();
-  const navigate = useNavigate();
+  const { id: bid } = useParams<{ id: string }>()
+  const [board, setBoard] = useState<Board>()
+  const navigate = useNavigate()
+  const userId = getId()
+  const isLoggedIn = userId !== null
 
   useEffect(() => {
-    const ListSetting = async () => {
+    if (!bid) return
+    const loadData = async () => {
       const res = await getBoardInfo(bid)
-      setPosts(res.data.result);
-    };
-    ListSetting();
-  }, [bid]);
+      setBoard(res.data.result)
+    }
+    loadData()
+  }, [bid])
+
+  const isWriter = board?.writer === userId
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Header />
-      <ReadMain>
-        <ReadCard>
-          <PostHeader>
-            <CategoryBadge>커뮤니티</CategoryBadge>
-            <PostTitle>{posts?.title || "제목을 불러오는 중..."}</PostTitle>
-            <PostMeta>
-              <MetaLeft>
-                <AuthorName>{posts?.id}</AuthorName>
-                <Divider />
-                <PostDate>{posts?.date?.slice(0, 10)}</PostDate>
-              </MetaLeft>
-              <MetaRight>
-                조회수 <span>{posts?.viewcount || 0}</span>
-              </MetaRight>
-            </PostMeta>
-          </PostHeader>
-          
-          <ContentArea>
-            {posts?.content || "내용이 없습니다."}
-          </ContentArea>
+      <main className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
+        <Button variant="ghost" onClick={() => navigate("/board")} className="mb-6">
+          ← 목록으로
+        </Button>
 
-          <FooterActions>
-            <ListBtn onClick={() => navigate("/board")}>목록으로</ListBtn>
-            {id === posts?.id && (
-              <UserActions>
-                <EditBtn onClick={() => navigate(`/board/update/${posts?.bid}`)}>수정</EditBtn>
-                <DeleteBtn onClick={() => navigate(`/board/delete/${posts?.bid}`)}>삭제</DeleteBtn>
-              </UserActions>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">{board?.title || "로딩 중..."}</CardTitle>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {board?.date?.slice(0, 10)}
+              </div>
+              <div className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                {board?.viewcount}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-invert max-w-none">
+              <p className="whitespace-pre-wrap leading-relaxed">{board?.content}</p>
+            </div>
+
+            {isLoggedIn && isWriter && (
+              <div className="flex gap-3 mt-8 pt-6 border-t">
+                <Button variant="outline" onClick={() => navigate(`/board/update/${bid}`)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  수정
+                </Button>
+                <Button variant="destructive" onClick={() => navigate(`/board/delete/${bid}`)}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  삭제
+                </Button>
+              </div>
             )}
-          </FooterActions>
-        </ReadCard>
-      </ReadMain>
-    </>
-  );
-};
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
 
-const ReadMain = styled.div`
-  width: 100%;
-  padding: 150px 0 100px;
-  background-color: #f8f9fa;
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-`;
-
-const ReadCard = styled.div`
-  width: 900px;
-  background: white;
-  border-radius: 20px;
-  padding: 50px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-`;
-
-const PostHeader = styled.div`
-  border-bottom: 2px solid #f1f3f5;
-  padding-bottom: 30px;
-  margin-bottom: 40px;
-`;
-
-const CategoryBadge = styled.span`
-  display: inline-block;
-  background: #eef2ff;
-  color: #5b73e8;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 15px;
-`;
-
-const PostTitle = styled.h1`
-  font-size: 32px;
-  font-weight: 800;
-  color: #212529;
-  margin-bottom: 20px;
-  line-height: 1.4;
-`;
-
-const PostMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const MetaLeft = styled.div`
-  display: flex;
-  align-items: center;
-  color: #868e96;
-  font-size: 15px;
-`;
-
-const AuthorName = styled.span`
-  font-weight: 600;
-  color: #495057;
-`;
-
-const Divider = styled.span`
-  width: 1px;
-  height: 12px;
-  background: #dee2e6;
-  margin: 0 15px;
-`;
-
-const PostDate = styled.span``;
-
-const MetaRight = styled.div`
-  font-size: 14px;
-  color: #adb5bd;
-  span { color: #495057; font-weight: 600; }
-`;
-
-const ContentArea = styled.div`
-  min-height: 300px;
-  font-size: 17px;
-  line-height: 1.8;
-  color: #343a40;
-  white-space: pre-wrap;
-`;
-
-const FooterActions = styled.div`
-  margin-top: 60px;
-  padding-top: 30px;
-  border-top: 1px solid #f1f3f5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const ListBtn = styled.button`
-  background: #f1f3f5;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #495057;
-  cursor: pointer;
-  &:hover { background: #e9ecef; }
-`;
-
-const UserActions = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const EditBtn = styled.button`
-  background: #5b73e8;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  &:hover { background: #3b5af2; }
-`;
-
-const DeleteBtn = styled.button`
-  background: white;
-  border: 1px solid #ff4d4f;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  color: #ff4d4f;
-  cursor: pointer;
-  &:hover { background: #fff1f0; }
-`;
-
-export default BoardInfo;
+export default BoardInfo
