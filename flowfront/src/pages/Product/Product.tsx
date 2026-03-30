@@ -41,7 +41,6 @@ const ProductPage = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       <main className="container mx-auto px-6 pt-24 pb-12">
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
           <div>
             <h1 className="text-4xl font-bold mb-2">
@@ -60,7 +59,6 @@ const ProductPage = () => {
           )}
         </div>
 
-        {/* Search Section */}
         <div className="glass rounded-2xl p-6 mb-10">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex gap-2">
@@ -103,7 +101,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.length > 0 ? (
             products.map((product, index) => (
@@ -130,7 +127,6 @@ const ProductPage = () => {
                     </div>
                   )}
                   
-                  {/* Category Badge */}
                   {product.category && (
                     <div className="absolute top-3 left-3">
                       <span className="px-3 py-1 text-xs font-medium rounded-full glass">
@@ -174,7 +170,6 @@ const ProductPage = () => {
           )}
         </div>
 
-        {/* Pagination */}
         <div className="mt-12">
           <PageNation pageLength={pageCount} pageIndex={pageNum} url="/product" />
         </div>

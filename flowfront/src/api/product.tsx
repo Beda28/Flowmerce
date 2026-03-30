@@ -1,9 +1,5 @@
 import client from "./client";
 
-export const getProductList = (pageNum: number) => {
-  return client.get(`/product/list/${pageNum}`);
-};
-
 export const searchProductList = (keyword: string, type: string, pageNum: number, sort: string = "newest") => {
   return client.post("/product/search", {
     keyword: keyword,

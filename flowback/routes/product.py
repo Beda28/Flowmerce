@@ -8,11 +8,6 @@ from uuid import uuid4
 
 router = APIRouter()
 
-@router.get('/list/{page}')
-async def product_list(page: int, db: AsyncSession = Depends(engine.get_db)):
-    result, total_count = await product.getProductList(db, page=page)
-    return {"result": result, "total_count": total_count}
-
 @router.post('/search')
 async def product_search(data: dto_product.Post_Product_Search, db: AsyncSession = Depends(engine.get_db)):
     result, total_count = await product.getProductList(db, stype=data.type, keyword=data.keyword, page=data.page, sort=data.sort)

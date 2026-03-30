@@ -162,7 +162,6 @@ const MyPage = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       <main className="container mx-auto px-6 pt-24 pb-12 max-w-5xl">
-        {/* Profile Card */}
         <div className="glass rounded-2xl p-8 mb-8">
           {!editMode && !chargeMode ? (
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -180,7 +179,6 @@ const MyPage = () => {
               </div>
               
               <div className="flex items-center gap-4">
-                {/* Balance Card */}
                 <div className="price-tag px-6 py-4">
                   <div className="flex items-center gap-3">
                     <Wallet className="h-6 w-6 text-primary" />
@@ -291,7 +289,6 @@ const MyPage = () => {
           )}
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
           {tabs.map(tab => (
             <button
@@ -314,7 +311,6 @@ const MyPage = () => {
           ))}
         </div>
 
-        {/* Content */}
         <div className="glass rounded-2xl p-6">
           {activeTab === "products" && (
             <div>

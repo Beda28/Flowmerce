@@ -1,7 +1,7 @@
 import json
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from sqlalchemy import select, func, update, desc, asc, insert
+from sqlalchemy import select, func, update, desc, asc, insert, delete
 from db import model
 
 async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, stype: str = None, keyword: str = None, sort: str = "newest", seller_uid: str = None):
@@ -24,8 +24,6 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         result = res.mappings().first()
         if result and result.get("category"):
             result = dict(result)
-            # SQLAlchemy already converts JSON to Python object, no need to json.loads
-            # but ensure it's a list
             if isinstance(result["category"], str):
                 import json
                 result["category"] = json.loads(result["category"])
@@ -46,7 +44,7 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         elif stype == "name":
             query = query.where(model.Product.name.ilike(keyword_pattern))
         elif stype == "category":
-            query = query.where(model.Product.category.ilike(keyword_pattern))
+            query = query.where(model.Product.name.ilike(keyword_pattern))
 
     count = select(func.count()).select_from(query.subquery())
     total_res = await db.execute(count)

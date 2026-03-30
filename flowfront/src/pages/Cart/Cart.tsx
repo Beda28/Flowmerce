@@ -69,7 +69,6 @@ const Cart = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       <main className="container mx-auto px-6 pt-24 pb-12 max-w-5xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-10">
           <div>
             <h1 className="text-4xl font-bold gradient-text">장바구니</h1>
@@ -77,7 +76,6 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Toolbar */}
         {items.length > 0 && (
           <div className="glass rounded-xl p-4 mb-6 flex items-center gap-4">
             <button
@@ -109,7 +107,6 @@ const Cart = () => {
         )}
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.length > 0 ? (
               items.map(item => (
@@ -120,7 +117,6 @@ const Cart = () => {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    {/* Checkbox */}
                     <button
                       onClick={() => toggleSelect(item.cart_id)}
                       className="flex-shrink-0"
@@ -132,7 +128,6 @@ const Cart = () => {
                       )}
                     </button>
 
-                    {/* Image */}
                     <div 
                       className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => navigate(`/product/${item.pid}`)}
@@ -146,7 +141,6 @@ const Cart = () => {
                       )}
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <h3 
                         className="font-semibold cursor-pointer hover:text-primary transition-colors truncate"
@@ -159,7 +153,6 @@ const Cart = () => {
                       </p>
                     </div>
 
-                    {/* Quantity */}
                     <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1">
                       <Button 
                         variant="ghost" 
@@ -180,12 +173,10 @@ const Cart = () => {
                       </Button>
                     </div>
 
-                    {/* Subtotal */}
                     <div className="text-right w-28">
                       <p className="text-lg font-bold">{(item.price * item.quantity).toLocaleString()}원</p>
                     </div>
 
-                    {/* Delete */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -211,7 +202,6 @@ const Cart = () => {
             )}
           </div>
 
-          {/* Order Summary */}
           {items.length > 0 && (
             <div className="lg:col-span-1">
               <div className="glass rounded-2xl p-6 sticky top-24">

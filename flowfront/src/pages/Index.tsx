@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
-import { getProductList } from "@/api/product"
+import { searchProductList } from "@/api/product"
 import { getId } from "@/utils/token"
 import { ShoppingBag, ArrowRight, Package, Users, TrendingUp, Shield } from "lucide-react"
 import type { Product } from "@/types/product"
@@ -15,7 +15,7 @@ const Index = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await getProductList(1)
+        const res = await searchProductList("", "all", 1, "newest")
         setFeaturedProducts(res.data.result?.slice(0, 4) || [])
       } catch {}
     }
@@ -26,7 +26,6 @@ const Index = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       
-      {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
@@ -68,7 +67,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="py-16 px-6">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -88,7 +86,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
       {featuredProducts.length > 0 && (
         <section className="py-16 px-6">
           <div className="container mx-auto">
@@ -146,7 +143,6 @@ const Index = () => {
         </section>
       )}
 
-      {/* Footer */}
       <footer className="py-12 px-6 border-t border-border/50">
         <div className="container mx-auto text-center text-muted-foreground">
           <p className="gradient-text font-bold text-xl mb-2">Flowmerce</p>

@@ -65,7 +65,6 @@ const AdminProductPage = () => {
           </Button>
         </div>
 
-        {/* Search & Filter */}
         <div className="glass rounded-2xl p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <select 
@@ -102,7 +101,6 @@ const AdminProductPage = () => {
           </div>
         </div>
 
-        {/* Table */}
         <div className="glass rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">

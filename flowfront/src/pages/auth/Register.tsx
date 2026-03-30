@@ -34,7 +34,6 @@ const Register = () => {
       <Header />
       <main className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="w-full max-w-md">
-          {/* Logo Section */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center mb-6">
               <div className="relative">
@@ -48,10 +47,8 @@ const Register = () => {
             <p className="text-muted-foreground">새 계정을 만드세요</p>
           </div>
 
-          {/* Register Form */}
           <div className="glass rounded-2xl p-8">
             <div className="space-y-6">
-              {/* ID Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -74,7 +71,6 @@ const Register = () => {
                 )}
               </div>
 
-              {/* Password Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Lock className="h-4 w-4" />
@@ -98,7 +94,6 @@ const Register = () => {
                 )}
               </div>
 
-              {/* Password Confirm Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Lock className="h-4 w-4" />
@@ -123,7 +118,6 @@ const Register = () => {
                 )}
               </div>
 
-              {/* Register Button */}
               <Button 
                 className="w-full h-12 btn-gradient text-base font-semibold" 
                 onClick={handleSubmit}
@@ -133,10 +127,8 @@ const Register = () => {
               </Button>
             </div>
 
-            {/* Divider */}
             <div className="divider-gradient my-6"></div>
 
-            {/* Login Link */}
             <p className="text-center text-sm text-muted-foreground">
               이미 계정이 있으신가요?{' '}
               <Link 
@@ -148,7 +140,6 @@ const Register = () => {
             </p>
           </div>
 
-          {/* Back to Home */}
           <p className="text-center mt-6">
             <Link 
               to="/" 

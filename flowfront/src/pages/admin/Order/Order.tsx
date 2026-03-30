@@ -57,7 +57,6 @@ const AdminOrderPage = () => {
             <p className="text-muted-foreground mt-2">전체 {orders.length}건</p>
           </div>
           
-          {/* Stats Card */}
           <div className="glass rounded-xl px-6 py-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">

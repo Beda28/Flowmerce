@@ -63,7 +63,6 @@ const ProductInfo = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       <main className="container mx-auto px-6 pt-24 pb-12">
-        {/* Back Button */}
         <Button 
           variant="ghost" 
           onClick={() => navigate("/product")} 
@@ -74,7 +73,6 @@ const ProductInfo = () => {
         </Button>
 
         <div className="grid lg:grid-cols-2 gap-10">
-          {/* Product Image */}
           <div className="relative">
             <div className="aspect-square rounded-2xl overflow-hidden glass">
               {product?.image ? (
@@ -91,7 +89,6 @@ const ProductInfo = () => {
               )}
             </div>
             
-            {/* Category Badge */}
             {product?.category && (
               <div className="absolute top-4 left-4">
                 <span className="px-4 py-2 text-sm font-medium rounded-full glass flex items-center gap-2">
@@ -102,9 +99,7 @@ const ProductInfo = () => {
             )}
           </div>
 
-          {/* Product Details */}
           <div className="space-y-6">
-            {/* Title & Price */}
             <div className="space-y-3">
               <h1 className="text-4xl font-bold">{product?.name || "로딩 중..."}</h1>
               <p className="text-4xl font-bold gradient-text">
@@ -112,7 +107,6 @@ const ProductInfo = () => {
               </p>
             </div>
 
-            {/* Info Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="glass rounded-xl p-4">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -130,7 +124,6 @@ const ProductInfo = () => {
               </div>
             </div>
 
-            {/* Seller Info */}
             <div className="glass rounded-xl p-5">
               <div className="flex items-center gap-2 text-muted-foreground mb-3">
                 <User className="h-4 w-4" />
@@ -149,7 +142,6 @@ const ProductInfo = () => {
               </div>
             </div>
 
-            {/* Description */}
             <div className="glass rounded-xl p-5">
               <div className="flex items-center gap-2 text-muted-foreground mb-3">
                 <Shield className="h-4 w-4" />
@@ -160,7 +152,6 @@ const ProductInfo = () => {
               </p>
             </div>
 
-            {/* Quantity & Total */}
             <div className="glass rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-muted-foreground">수량</span>
@@ -193,7 +184,6 @@ const ProductInfo = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-4">
               {isLoggedIn && !isSeller && (
                 <>
