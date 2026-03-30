@@ -118,6 +118,10 @@ export const updateOrderStatus = (orderId: string, status: string) => {
   return client.patch(`/cart/order/${orderId}/status?status=${status}`);
 };
 
+export const getSalesOrders = () => {
+  return client.get("/cart/order/sales");
+};
+
 export const getAdminOrderList = () => {
   return client.get("/admin/order/list");
 };

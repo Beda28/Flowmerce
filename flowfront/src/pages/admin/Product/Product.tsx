@@ -157,7 +157,7 @@ const AdminProductPage = () => {
                       <td className="py-4 px-6 text-muted-foreground">
                         <div className="flex items-center gap-2">
                           <Calendar className="h-3.5 w-3.5" />
-                          {product.date?.slice(0, 10)}
+                          {(product.date || "").slice(0, 10)}
                         </div>
                       </td>
                       <td className="py-4 px-4">

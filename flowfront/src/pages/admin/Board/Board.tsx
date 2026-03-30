@@ -124,7 +124,7 @@ const AdminBoardPage = () => {
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="h-3.5 w-3.5" />
-                          {post.date?.slice(0, 10)}
+                          {(post.date || "").slice(0, 10)}
                         </div>
                       </td>
                       <td className="py-4 px-6">

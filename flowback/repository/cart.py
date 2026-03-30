@@ -154,6 +154,19 @@ async def getOrderList(db: AsyncSession, uid: str):
     res = await db.execute(query)
     return res.mappings().all()
 
+async def getSalesOrderList(db: AsyncSession, seller_uid: str):
+    query = (select(model.Order.order_id, model.Order.pid, model.Order.quantity, 
+                    model.Order.total_price, model.Order.date, model.Order.status,
+                    model.Order.uid,
+                    model.Product.name, model.Product.price, model.Product.image,
+                    model.User.id)
+             .join(model.Product, model.Order.pid == model.Product.pid)
+             .join(model.User, model.Order.uid == model.User.uid)
+             .where(model.Product.seller_uid == seller_uid)
+             .order_by(desc(model.Order.date)))
+    res = await db.execute(query)
+    return res.mappings().all()
+
 async def getOrderDetail(db: AsyncSession, order_id: str):
     query = (select(model.Order, model.Product.name, model.Product.image, model.Product.seller_uid)
              .join(model.Product, model.Order.pid == model.Product.pid)

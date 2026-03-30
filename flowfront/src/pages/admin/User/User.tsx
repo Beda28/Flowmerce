@@ -69,7 +69,7 @@ const AdminUserPage = () => {
                         </div>
                       </td>
                       <td className="py-4 px-6 text-muted-foreground font-mono text-sm">
-                        {user.uid.slice(0, 8)}...
+                        {(user.uid || "").slice(0, 8)}...
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-2">

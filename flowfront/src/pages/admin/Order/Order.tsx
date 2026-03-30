@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import AdminHeader from "@/components/AdminHeader"
-import { getAdminOrderList } from "@/api/product"
+import { getAdminOrderList, updateOrderStatus } from "@/api/product"
 import { ShoppingCart, Clock, CheckCircle, XCircle, Truck, Package, Calendar, User, CreditCard } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface Order {
   order_id: string
@@ -43,6 +44,24 @@ const AdminOrderPage = () => {
     .filter(o => o.status === 'completed' || o.status === 'shipping')
     .reduce((sum, o) => sum + o.total_price, 0)
 
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      await updateOrderStatus(orderId, newStatus)
+      setOrders(orders.map(o => 
+        o.order_id === orderId ? { ...o, status: newStatus } : o
+      ))
+    } catch (e) {
+      console.error(e)
+      alert("상태 변경에 실패했습니다.")
+    }
+  }
+
+  const getNextStatuses = (currentStatus: string) => {
+    if (currentStatus === "paid") return ["shipping"]
+    if (currentStatus === "shipping") return ["completed"]
+    return []
+  }
+
   return (
     <div className="min-h-screen gradient-bg">
       <AdminHeader />
@@ -82,6 +101,7 @@ const AdminOrderPage = () => {
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">총금액</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">상태</th>
                   <th className="text-left py-4 px-6 font-semibold text-muted-foreground">날짜</th>
+                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,7 +117,7 @@ const AdminOrderPage = () => {
                       <tr key={order.order_id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                         <td className="py-4 px-6">
                           <span className="font-mono text-sm text-muted-foreground">
-                            {order.order_id.slice(0, 8)}...
+                            {(order.order_id || "").slice(0, 8)}...
                           </span>
                         </td>
                         <td className="py-4 px-6">
@@ -120,7 +140,32 @@ const AdminOrderPage = () => {
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Calendar className="h-3.5 w-3.5" />
-                            {order.date?.slice(0, 10)}
+                            {(order.date || "").slice(0, 10)}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex gap-2">
+                            {getNextStatuses(order.status).map((nextStatus) => (
+                              <Button
+                                key={nextStatus}
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(order.order_id, nextStatus)}
+                                className="text-xs"
+                              >
+                                {statusMap[nextStatus]?.label}
+                              </Button>
+                            ))}
+                            {order.status !== "cancelled" && order.status !== "completed" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleStatusChange(order.order_id, "cancelled")}
+                                className="text-xs text-red-400 hover:text-red-500"
+                              >
+                                취소
+                              </Button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -128,7 +173,7 @@ const AdminOrderPage = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-20 text-center">
+                    <td colSpan={8} className="py-20 text-center">
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
                           <ShoppingCart className="h-8 w-8 text-muted-foreground opacity-50" />

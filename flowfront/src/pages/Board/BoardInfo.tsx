@@ -40,7 +40,7 @@ const BoardInfo = () => {
             <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {board?.date?.slice(0, 10)}
+                {(board?.date || "").slice(0, 10)}
               </div>
               <div className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />

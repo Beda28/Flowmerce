@@ -64,7 +64,7 @@ const AdminProductInfo = () => {
                   </div>
                   <div>
                     <span className="text-muted-foreground">등록일: </span>
-                    <span className="font-medium">{product?.date?.slice(0, 10) || "-"}</span>
+                    <span className="font-medium">{(product?.date || "").slice(0, 10) || "-"}</span>
                   </div>
                 </div>
 

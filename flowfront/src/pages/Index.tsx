@@ -16,7 +16,7 @@ const Index = () => {
     const loadProducts = async () => {
       try {
         const res = await searchProductList("", "all", 1, "newest")
-        setFeaturedProducts(res.data.result?.slice(0, 4) || [])
+        setFeaturedProducts((res.data.result || []).slice(0, 4))
       } catch {}
     }
     loadProducts()

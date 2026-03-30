@@ -45,7 +45,7 @@ const AdminBoardInfo = () => {
               <span className="text-border">|</span>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {post?.date?.slice(0, 10)}
+                {(post?.date || "").slice(0, 10)}
               </div>
               <div className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />

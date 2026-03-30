@@ -150,7 +150,7 @@ const ChatRoom = () => {
                     }`}>
                       <p className="text-sm">{msg.message}</p>
                       <p className={`text-xs mt-1.5 ${isMe ? 'text-white/70' : 'text-muted-foreground'}`}>
-                        {msg.created_at?.slice(11, 16) || ''}
+                        {(msg.created_at || "").slice(11, 16)}
                       </p>
                     </div>
                   </div>

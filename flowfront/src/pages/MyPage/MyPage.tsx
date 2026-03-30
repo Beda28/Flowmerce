@@ -4,7 +4,7 @@ import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { getMyProducts, getChatRooms, getCartList, getProfile, updateProfile, getOrderList, payOrder, cancelOrder, updateOrderStatus } from "@/api/product"
+import { getMyProducts, getChatRooms, getCartList, getProfile, updateProfile, getOrderList, payOrder, cancelOrder, updateOrderStatus, getSalesOrders } from "@/api/product"
 import { addBalance } from "@/api/auth"
 import { getId } from "@/utils/token"
 import { 
@@ -58,6 +58,20 @@ interface OrderItem {
   seller_uid: string
 }
 
+interface SalesOrderItem {
+  order_id: string
+  pid: string
+  name: string
+  price: number
+  quantity: number
+  total_price: number
+  date: string
+  status: string
+  image: string | null
+  uid: string
+  id: string
+}
+
 const MyPage = () => {
   const navigate = useNavigate()
   const userId = getId()
@@ -66,6 +80,7 @@ const MyPage = () => {
   const [chatRooms, setChatRooms] = useState<ChatRoomItem[]>([])
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [orders, setOrders] = useState<OrderItem[]>([])
+  const [salesOrders, setSalesOrders] = useState<SalesOrderItem[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [editMode, setEditMode] = useState(false)
   const [chargeMode, setChargeMode] = useState(false)
@@ -84,12 +99,13 @@ const MyPage = () => {
   }, [])
 
   const loadData = async () => {
-    const [profileRes, productRes, chatRes, cartRes, orderRes] = await Promise.all([
+    const [profileRes, productRes, chatRes, cartRes, orderRes, salesOrderRes] = await Promise.all([
       getProfile(),
       getMyProducts(),
       getChatRooms(),
       getCartList(),
-      getOrderList()
+      getOrderList(),
+      getSalesOrders()
     ])
     setProfile(profileRes.data)
     setNewId(profileRes.data.id)
@@ -98,6 +114,7 @@ const MyPage = () => {
     setChatRooms(chatRes.data.result || [])
     setCartItems(cartRes.data.result || [])
     setOrders(orderRes.data.result || [])
+    setSalesOrders(salesOrderRes.data.result || [])
   }
 
   const handlePay = async (orderId: string) => {
@@ -117,6 +134,18 @@ const MyPage = () => {
     await updateOrderStatus(orderId, status)
     alert("상태가 변경되었습니다.")
     loadData()
+  }
+
+  const handleSalesStatusChange = async (orderId: string, status: string) => {
+    try {
+      await updateOrderStatus(orderId, status)
+      setSalesOrders(salesOrders.map(o => 
+        o.order_id === orderId ? { ...o, status: status } : o
+      ))
+    } catch (e) {
+      console.error(e)
+      alert("상태 변경에 실패했습니다.")
+    }
   }
 
   const handleSaveProfile = async () => {
@@ -145,6 +174,7 @@ const MyPage = () => {
 
   const tabs = [
     { id: "products", label: "내 상품", icon: Store, count: myProducts.length },
+    { id: "sales", label: "판매주문", icon: Package, count: salesOrders.length },
     { id: "orders", label: "주문내역", icon: ClipboardList, count: orders.length },
     { id: "cart", label: "장바구니", icon: ShoppingCart, count: cartItems.length },
     { id: "chat", label: "문의", icon: MessageCircle, count: chatRooms.length },
@@ -371,6 +401,66 @@ const MyPage = () => {
                   <Button onClick={() => navigate("/product/write")} variant="outline">
                     첫 상품 등록하기
                   </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "sales" && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6">판매주문</h2>
+              
+              {salesOrders.length > 0 ? (
+                <div className="space-y-4">
+                  {salesOrders.map(order => {
+                    const statusInfo = statusMap[order.status] || { 
+                      label: order.status, 
+                      className: "status-pending", 
+                      icon: Clock 
+                    }
+                    const StatusIcon = statusInfo.icon
+                    return (
+                      <div key={order.order_id} className="flex items-center gap-4 p-4 rounded-xl bg-muted/30">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
+                          {order.image ? (
+                            <img src={`/uploads/${order.image}`} alt={order.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="h-6 w-6 text-muted-foreground opacity-30" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{order.name}</h3>
+                          <p className="text-sm text-muted-foreground">구매자: {order.id}</p>
+                          <p className="text-sm text-muted-foreground">{order.quantity}개 · {(order.total_price || 0).toLocaleString()}원</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`status-badge ${statusInfo.className}`}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {statusInfo.label}
+                          </span>
+                          <div className="flex gap-2">
+                            {order.status === "paid" && (
+                              <Button size="sm" variant="outline" onClick={() => handleSalesStatusChange(order.order_id, "shipping")}>
+                                배송중
+                              </Button>
+                            )}
+                            {order.status === "shipping" && (
+                              <Button size="sm" variant="outline" onClick={() => handleSalesStatusChange(order.order_id, "completed")}>
+                                거래완료
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground opacity-30 mb-4" />
+                  <p className="text-muted-foreground">판매 주문이 없습니다</p>
                 </div>
               )}
             </div>

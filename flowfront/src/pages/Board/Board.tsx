@@ -112,7 +112,7 @@ const BoardPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      <span>{board.date?.slice(0, 10)}</span>
+                      <span>{(board.date || "").slice(0, 10)}</span>
                     </div>
                   </div>
                 </div>
