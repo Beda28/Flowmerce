@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy import create_engine
 import os
 
 MYSQL_USER = os.getenv("MYSQL_USER")
@@ -6,7 +7,7 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
 engine = create_async_engine(
-    f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PASSWORD}@flow-sql:3306/{MYSQL_DATABASE}",
+    f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PASSWORD}@flow-sql:3306/{MYSQL_DATABASE}?charset=utf8mb4",
     pool_recycle=300,
     pool_pre_ping=True,
     echo=True,
