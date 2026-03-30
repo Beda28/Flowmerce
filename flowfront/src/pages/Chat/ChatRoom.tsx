@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getChatMessages } from "@/api/product"
 import { getId } from "@/utils/token"
-import { Send, ArrowLeft, Wifi, WifiOff, MessageCircle } from "lucide-react"
+import { Send, ArrowLeft, MessageCircle, X } from "lucide-react"
 
 interface Message {
   sender_uid: string
@@ -17,9 +17,8 @@ const ChatRoom = () => {
   const { roomId } = useParams<{ roomId: string }>()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
-  const [connected, setConnected] = useState(false)
+  const [isConnected, setIsConnected] = useState(true)
   const ws = useRef<WebSocket | null>(null)
-  const reconnectTimer = useRef<NodeJS.Timeout | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const userId = getId()
@@ -33,7 +32,7 @@ const ChatRoom = () => {
     ws.current = new WebSocket(wsUrl)
     
     ws.current.onopen = () => {
-      setConnected(true)
+      setIsConnected(true)
       const token = localStorage.getItem("FM_Access")
       if (token) {
         try {
@@ -44,15 +43,11 @@ const ChatRoom = () => {
     }
     
     ws.current.onclose = () => {
-      setConnected(false)
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
-      reconnectTimer.current = setTimeout(() => {
-        connectWebSocket()
-      }, 3000)
+      setIsConnected(false)
     }
     
     ws.current.onerror = () => {
-      setConnected(false)
+      setIsConnected(false)
     }
     
     ws.current.onmessage = (event) => {
@@ -82,7 +77,6 @@ const ChatRoom = () => {
     connectWebSocket()
 
     return () => {
-      if (reconnectTimer.current) clearTimeout(reconnectTimer.current)
       ws.current?.close()
     }
   }, [roomId, connectWebSocket])
@@ -92,7 +86,7 @@ const ChatRoom = () => {
   }, [messages])
 
   const sendMessage = () => {
-    if (!input.trim() || !ws.current || !connected) return
+    if (!input.trim() || !ws.current || !isConnected) return
     const token = localStorage.getItem("FM_Access")
     if (!token) return
     try {
@@ -105,6 +99,13 @@ const ChatRoom = () => {
       }])
       setInput("")
     } catch {}
+  }
+
+  const handleClose = () => {
+    if (ws.current) {
+      ws.current.close()
+    }
+    navigate("/chat")
   }
 
   return (
@@ -121,19 +122,15 @@ const ChatRoom = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold gradient-text">문의</h1>
-          <div className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-full glass">
-            {connected ? (
-              <>
-                <Wifi className="h-4 w-4 text-green-400" />
-                <span className="text-sm text-green-400">연결됨</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-4 w-4 text-red-400" />
-                <span className="text-sm text-red-400">연결 끊김</span>
-              </>
-            )}
-          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleClose}
+            className="ml-auto text-red-400 hover:text-red-500 hover:bg-red-500/10"
+          >
+            <X className="h-4 w-4 mr-2" />
+            상담 종료
+          </Button>
         </div>
 
         <div className="glass rounded-2xl overflow-hidden flex flex-col h-[500px]">
@@ -172,12 +169,12 @@ const ChatRoom = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               placeholder="메시지를 입력하세요..."
-              disabled={!connected}
+              disabled={!isConnected}
               className="input-modern"
             />
             <Button 
               onClick={sendMessage} 
-              disabled={!connected || !input.trim()}
+              disabled={!isConnected || !input.trim()}
               className="btn-gradient"
             >
               <Send className="h-4 w-4" />
