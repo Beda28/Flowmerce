@@ -514,7 +514,7 @@ const MyPage = () => {
                               <div>
                                 <h3 className="font-semibold">{order.name}</h3>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                  {order.quantity}개 · {order.total_price.toLocaleString()}원
+                                  {order.quantity}개 · {(order.total_price || 0).toLocaleString()}원
                                 </p>
                               </div>
                               <span className={`status-badge ${statusInfo.className}`}>

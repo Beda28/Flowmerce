@@ -102,6 +102,10 @@ async def createOrder(uid: str, cart_items, db: AsyncSession):
             
             item_total = product.price * item["quantity"]
             total_price += item_total
+
+            item["seller_uid"] = product.seller_uid
+            item["unit_price"] = product.price
+            item["item_total"] = item_total
         
         if user_balance < total_price:
             raise HTTPException(status_code=400, detail={"code": "INSUFFICIENT_BALANCE", "msg": "잔고가 부족합니다."})
@@ -114,6 +118,11 @@ async def createOrder(uid: str, cart_items, db: AsyncSession):
                 update(model.Product).where(model.Product.pid == item["pid"]).values(
                     stock=product.stock - item["quantity"]
                 )
+            )
+            await db.execute(
+                update(model.User)
+                .where(model.User.uid == item["seller_uid"])
+                .values(balance=model.User.balance + item["item_total"])
             )
             
             item_total = product.price * item["quantity"]
@@ -219,5 +228,3 @@ async def getAllOrders(db: AsyncSession):
              .order_by(desc(model.Order.date)))
     res = await db.execute(query)
     return res.mappings().all()
-
-from sqlalchemy import update, insert, delete, desc

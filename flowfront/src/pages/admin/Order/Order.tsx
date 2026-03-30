@@ -14,44 +14,64 @@ interface Order {
   status: string
   name: string
   image: string | null
-  id: string
+  id: string 
 }
 
 const statusMap: Record<string, { label: string; className: string; icon: any }> = {
-  pending: { label: "결제대기", className: "status-pending", icon: Clock },
-  paid: { label: "결제완료", className: "status-paid", icon: CheckCircle },
-  shipping: { label: "배송중", className: "status-shipping", icon: Truck },
-  completed: { label: "거래완료", className: "status-completed", icon: CheckCircle },
-  cancelled: { label: "취소", className: "status-cancelled", icon: XCircle },
+  pending: { label: "결제대기", className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20", icon: Clock },
+  paid: { label: "결제완료", className: "bg-blue-500/10 text-blue-500 border-blue-500/20", icon: CheckCircle },
+  shipping: { label: "배송중", className: "bg-purple-500/10 text-purple-500 border-purple-500/20", icon: Truck },
+  completed: { label: "거래완료", className: "bg-green-500/10 text-green-500 border-green-500/20", icon: CheckCircle },
+  cancelled: { label: "취소", className: "bg-red-500/10 text-red-500 border-red-500/20", icon: XCircle },
 }
 
 const AdminOrderPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
 
-  useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        const res = await getAdminOrderList()
-        setOrders(res.data.result || [])
-      } catch (e) {
-        console.error(e)
-      }
+  const loadOrders = async () => {
+    try {
+      const res = await getAdminOrderList()
+      console.log("test" , res.data)
+      const rawData = res.data.result || res.data || []
+      
+      const formattedData = rawData.map((item: any) => {
+        const orderBase = item.Order || item;
+        
+        return {
+          order_id: orderBase.order_id || "",
+          uid: orderBase.uid || "",
+          pid: orderBase.pid || "",
+          quantity: orderBase.quantity || 0,
+          total_price: orderBase.total_price || 0,
+          date: orderBase.date || "",
+          status: orderBase.status || "pending",
+          name: item.name || "삭제된 상품",
+          image: item.image || null,
+          id: item.id || "알 수 없음"
+        }
+      })
+      
+      setOrders(formattedData)
+    } catch (e) {
+      console.error("Data Fetch Error:", e)
     }
+  }
+
+  useEffect(() => {
     loadOrders()
   }, [])
 
   const totalRevenue = orders
-    .filter(o => o.status === 'completed' || o.status === 'shipping')
-    .reduce((sum, o) => sum + (o.total_price || 0), 0)
+    .filter(o => ["paid", "shipping", "completed"].includes(o.status))
+    .reduce((sum, o) => sum + (Number(o.total_price) || 0), 0)
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
       await updateOrderStatus(orderId, newStatus)
-      setOrders(orders.map(o => 
+      setOrders(prev => prev.map(o => 
         o.order_id === orderId ? { ...o, status: newStatus } : o
       ))
     } catch (e) {
-      console.error(e)
       alert("상태 변경에 실패했습니다.")
     }
   }
@@ -82,86 +102,93 @@ const AdminOrderPage = () => {
                 <CreditCard className="h-6 w-6 text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">총 매출</p>
+                <p className="text-sm text-muted-foreground">총 매출 (입금확인됨)</p>
                 <p className="text-2xl font-bold text-green-400">{totalRevenue.toLocaleString()}원</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="glass rounded-2xl overflow-hidden">
+        <div className="glass rounded-2xl overflow-hidden border border-white/10">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border/50">
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">주문ID</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">구매자</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">상품</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">수량</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">총금액</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">상태</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">날짜</th>
-                  <th className="text-left py-4 px-6 font-semibold text-muted-foreground">관리</th>
+                <tr className="border-b border-white/10 bg-white/5">
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">주문ID</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">구매자</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">상품명</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">수량</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">금액</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">상태</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase">날짜</th>
+                  <th className="text-left py-4 px-6 text-xs font-semibold text-muted-foreground uppercase text-center">관리</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {orders.length > 0 ? (
                   orders.map((order) => {
                     const statusInfo = statusMap[order.status] || { 
                       label: order.status, 
-                      className: "status-pending", 
+                      className: "bg-slate-500/10 text-slate-500 border-slate-500/20", 
                       icon: Package 
                     }
                     const StatusIcon = statusInfo.icon
                     return (
-                      <tr key={order.order_id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                      <tr key={order.order_id} className="hover:bg-white/5 transition-colors">
                         <td className="py-4 px-6">
-                          <span className="font-mono text-sm text-muted-foreground">
-                            {(order.order_id || "").slice(0, 8)}...
-                          </span>
+                          <code className="text-[10px] text-muted-foreground bg-white/5 px-1.5 py-0.5 rounded">
+                            {order.order_id?.substring(0, 8) || "N/A"}
+                          </code>
                         </td>
                         <td className="py-4 px-6">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span>{order.id}</span>
+                          <span className="text-sm font-medium text-white">{order.id}</span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-muted flex-shrink-0 overflow-hidden border border-white/5">
+                              {order.image ? (
+                                <img src={`/uploads/${order.image}`} className="w-full h-full object-cover" alt="" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center opacity-20"><Package className="h-4 w-4" /></div>
+                              )}
+                            </div>
+                            <span className="font-medium text-sm truncate max-w-[120px]">{order.name}</span>
                           </div>
                         </td>
-                        <td className="py-4 px-6 font-medium">{order.name}</td>
-                        <td className="py-4 px-6">{order.quantity}개</td>
-                        <td className="py-4 px-6 font-semibold text-green-400">
-                          {(order.total_price || 0).toLocaleString()}원
+                        <td className="py-4 px-6 text-sm">{order.quantity}</td>
+                        <td className="py-4 px-6 font-bold text-sm text-white">
+                          {(Number(order.total_price) || 0).toLocaleString()}원
                         </td>
                         <td className="py-4 px-6">
-                          <span className={`status-badge ${statusInfo.className}`}>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusInfo.className}`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {statusInfo.label}
                           </span>
                         </td>
                         <td className="py-4 px-6">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {(order.date || "").slice(0, 10)}
-                          </div>
+                          <span className="text-[11px] text-muted-foreground">
+                            {order.date ? new Date(order.date).toLocaleDateString() : "-"}
+                          </span>
                         </td>
                         <td className="py-4 px-6">
-                          <div className="flex gap-2">
+                          <div className="flex justify-center gap-1.5">
                             {getNextStatuses(order.status).map((nextStatus) => (
                               <Button
                                 key={nextStatus}
                                 size="sm"
-                                variant="outline"
+                                variant="secondary"
                                 onClick={() => handleStatusChange(order.order_id, nextStatus)}
-                                className="text-xs"
+                                className="h-7 px-2.5 text-[10px] font-bold bg-white/10 hover:bg-white/20 text-white"
                               >
                                 {statusMap[nextStatus]?.label}
                               </Button>
                             ))}
-                            {order.status !== "cancelled" && order.status !== "completed" && (
+                            {["paid", "shipping", "pending"].includes(order.status) && (
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant="ghost"
                                 onClick={() => handleStatusChange(order.order_id, "cancelled")}
-                                className="text-xs text-red-400 hover:text-red-500"
+                                className="h-7 px-2.5 text-[10px] text-red-400 hover:text-red-500 hover:bg-red-500/10"
                               >
                                 취소
                               </Button>
@@ -173,12 +200,10 @@ const AdminOrderPage = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="py-20 text-center">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
-                          <ShoppingCart className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                        <p className="text-muted-foreground">거래 내역이 없습니다</p>
+                    <td colSpan={8} className="py-32 text-center">
+                      <div className="flex flex-col items-center gap-3 opacity-20">
+                        <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+                        <p className="text-lg">데이터를 불러올 수 없거나 내역이 없습니다</p>
                       </div>
                     </td>
                   </tr>

@@ -10,6 +10,8 @@ engine = create_async_engine(
     f"mysql+aiomysql://{MYSQL_USER}:{MYSQL_PASSWORD}@flow-sql:3306/{MYSQL_DATABASE}?charset=utf8mb4",
     pool_recycle=300,
     pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
     echo=True,
 )
 
