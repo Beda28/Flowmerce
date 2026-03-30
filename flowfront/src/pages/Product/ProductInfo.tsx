@@ -2,21 +2,19 @@ import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
-import { getProductInfo, addToCart, createChatRoom, getSellerInfo } from "@/api/product"
+import { getProductInfo, addToCart, createChatRoom } from "@/api/product"
 import { getId } from "@/utils/token"
 import { ShoppingCart, MessageSquare, Minus, Plus, Edit, ArrowLeft, User, Package, Calendar, Tag, Shield } from "lucide-react"
 import type { Product } from "@/types/product"
 
-interface SellerInfo {
-  uid: string
-  id: string
-  intro: string | null
+interface ProductWithSeller extends Product {
+  seller_id?: string
+  seller_intro?: string
 }
 
 const ProductInfo = () => {
   const { id: pid } = useParams<{ id: string }>()
-  const [product, setProduct] = useState<Product>()
-  const [seller, setSeller] = useState<SellerInfo | null>(null)
+  const [product, setProduct] = useState<ProductWithSeller>()
   const [quantity, setQuantity] = useState(1)
   const navigate = useNavigate()
   const userId = getId()
@@ -27,12 +25,6 @@ const ProductInfo = () => {
     const loadData = async () => {
       const res = await getProductInfo(pid)
       setProduct(res.data.result)
-      if (res.data.result?.seller_uid) {
-        try {
-          const sellerRes = await getSellerInfo(res.data.result.seller_uid)
-          setSeller(sellerRes.data)
-        } catch {}
-      }
     }
     loadData()
   }, [pid])
@@ -134,9 +126,9 @@ const ProductInfo = () => {
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold">{seller?.id || "정보 없음"}</p>
-                  {seller?.intro && (
-                    <p className="text-sm text-muted-foreground">{seller.intro}</p>
+                  <p className="font-semibold">{product?.seller_id || "정보 없음"}</p>
+                  {product?.seller_intro && (
+                    <p className="text-sm text-muted-foreground">{product.seller_intro}</p>
                   )}
                 </div>
               </div>

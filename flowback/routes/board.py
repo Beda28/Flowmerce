@@ -20,6 +20,7 @@ async def post_search(data: dto_board.Post_Search, db: AsyncSession = Depends(en
 
 @router.get('/info/{bid}')
 async def post_info(bid: str, db: AsyncSession = Depends(engine.get_db)):
+    await board.AddViewCount(bid, db)
     result = await board.getBoardList(db, bid=bid)
     if not result:
         raise HTTPException(status_code=404, detail="존재하지 않는 게시글입니다.")

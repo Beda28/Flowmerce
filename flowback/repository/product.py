@@ -19,18 +19,23 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         query = query.order_by(desc(model.Product.date))
     
     if pid:
-        query = query.where(model.Product.pid == pid)
+        query = (select(model.Product, model.User.id.label("seller_id"), model.User.intro.label("seller_intro"))
+                .join(model.User, model.Product.seller_uid == model.User.uid)
+                .where(model.Product.pid == pid))
         res = await db.execute(query)
         result = res.mappings().first()
-        if result and result.get("category"):
+        if result:
             result = dict(result)
-            if isinstance(result["category"], str):
-                try:
-                    result["category"] = json.loads(result["category"])
-                except (json.JSONDecodeError, ValueError):
+            if result.get("category"):
+                if isinstance(result["category"], str):
+                    try:
+                        result["category"] = json.loads(result["category"])
+                    except (json.JSONDecodeError, ValueError):
+                        result["category"] = []
+                elif not isinstance(result["category"], list):
                     result["category"] = []
-            elif not isinstance(result["category"], list):
-                result["category"] = []
+            result["seller_id"] = result.get("seller_id")
+            result["seller_intro"] = result.get("seller_intro")
         return result
     
     if seller_uid:

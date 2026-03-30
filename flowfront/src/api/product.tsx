@@ -145,7 +145,3 @@ export const getProfile = () => {
 export const updateProfile = (id?: string, pw?: string, intro?: string) => {
   return client.patch("/auth/profile", { id, pw, intro });
 };
-
-export const getSellerInfo = (uid: string) => {
-  return client.get(`/auth/user/${uid}`);
-};

@@ -99,22 +99,37 @@ const MyPage = () => {
   }, [])
 
   const loadData = async () => {
-    const [profileRes, productRes, chatRes, cartRes, orderRes, salesOrderRes] = await Promise.all([
-      getProfile(),
-      getMyProducts(),
-      getChatRooms(),
-      getCartList(),
-      getOrderList(),
-      getSalesOrders()
-    ])
-    setProfile(profileRes.data)
-    setNewId(profileRes.data.id)
-    setNewIntro(profileRes.data.intro || "")
-    setMyProducts(productRes.data.result || [])
-    setChatRooms(chatRes.data.result || [])
-    setCartItems(cartRes.data.result || [])
-    setOrders(orderRes.data.result || [])
-    setSalesOrders(salesOrderRes.data.result || [])
+    try {
+      const profileRes = await getProfile()
+      setProfile(profileRes.data)
+      setNewId(profileRes.data.id)
+      setNewIntro(profileRes.data.intro || "")
+    } catch {}
+    
+    try {
+      const productRes = await getMyProducts()
+      setMyProducts(productRes.data.result || [])
+    } catch {}
+    
+    try {
+      const chatRes = await getChatRooms()
+      setChatRooms(chatRes.data.result || [])
+    } catch {}
+    
+    try {
+      const cartRes = await getCartList()
+      setCartItems(cartRes.data.result || [])
+    } catch {}
+    
+    try {
+      const orderRes = await getOrderList()
+      setOrders(orderRes.data.result || [])
+    } catch {}
+    
+    try {
+      const salesOrderRes = await getSalesOrders()
+      setSalesOrders(salesOrderRes.data.result || [])
+    } catch {}
   }
 
   const handlePay = async (orderId: string) => {

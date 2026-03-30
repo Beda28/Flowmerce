@@ -8,6 +8,11 @@ from uuid import uuid4
 
 router = APIRouter()
 
+@router.get('/list')
+async def product_list(db: AsyncSession = Depends(engine.get_db), _ = Depends(token.CheckAdmin)):
+    result, total_count = await product.getProductList(db, page=1, sort="newest")
+    return {"result": result, "total_count": total_count}
+
 @router.post('/write')
 async def product_write(data: dto_product.Post_Product_Write, db: AsyncSession = Depends(engine.get_db), _ = Depends(token.CheckAdmin)):
     pid = str(uuid4())
