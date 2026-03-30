@@ -46,7 +46,7 @@ const Cart = () => {
   }
 
   const selectedItems = items.filter(item => selected.includes(item.cart_id))
-  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const totalPrice = selectedItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0)
 
   const handleOrder = async () => {
     if (selectedItems.length === 0) {

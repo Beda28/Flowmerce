@@ -52,6 +52,12 @@ async def order_list(request: Request, db: AsyncSession = Depends(engine.get_db)
     result = await cart.getOrderList(db, uid)
     return {"result": result}
 
+@router.get('/order/sales')
+async def get_sales_orders(request: Request, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
+    uid = payload.get("uuid")
+    result = await cart.getSalesOrderList(db, uid)
+    return {"result": result}
+
 @router.get('/order/{order_id}')
 async def order_detail(order_id: str, request: Request, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
     uid = payload.get("uuid")
@@ -89,11 +95,5 @@ async def update_order_status(order_id: str, status: str, request: Request, db: 
     if status not in ["shipping", "completed"]:
         raise HTTPException(status_code=400, detail="유효하지 않은 상태입니다.")
     return await cart.updateOrderStatus(db, order_id, status, uid)
-
-@router.get('/order/sales')
-async def get_sales_orders(request: Request, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
-    uid = payload.get("uuid")
-    result = await cart.getSalesOrderList(db, uid)
-    return {"result": result}
 
 from fastapi import HTTPException

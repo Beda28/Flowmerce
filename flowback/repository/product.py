@@ -19,8 +19,9 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         query = query.order_by(desc(model.Product.date))
     
     if pid:
-        query = (select(model.Product, model.User.id.label("seller_id"), model.User.intro.label("seller_intro"))
-                .join(model.User, model.Product.seller_uid == model.User.uid)
+        query = (select(model.Product.pid, model.Product.seller_uid, model.Product.name, model.Product.description,
+                        model.Product.category, model.Product.image, model.Product.price, 
+                        model.Product.date, model.Product.stock)
                 .where(model.Product.pid == pid))
         res = await db.execute(query)
         result = res.mappings().first()
@@ -34,8 +35,11 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
                         result["category"] = []
                 elif not isinstance(result["category"], list):
                     result["category"] = []
-            result["seller_id"] = result.get("seller_id")
-            result["seller_intro"] = result.get("seller_intro")
+            seller_result = await db.execute(select(model.User.id, model.User.intro).where(model.User.uid == result.get("seller_uid")))
+            seller = seller_result.mappings().first()
+            if seller:
+                result["seller_id"] = seller.get("id")
+                result["seller_intro"] = seller.get("intro")
         return result
     
     if seller_uid:

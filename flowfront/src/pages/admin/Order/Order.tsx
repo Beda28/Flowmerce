@@ -42,7 +42,7 @@ const AdminOrderPage = () => {
 
   const totalRevenue = orders
     .filter(o => o.status === 'completed' || o.status === 'shipping')
-    .reduce((sum, o) => sum + o.total_price, 0)
+    .reduce((sum, o) => sum + (o.total_price || 0), 0)
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -129,7 +129,7 @@ const AdminOrderPage = () => {
                         <td className="py-4 px-6 font-medium">{order.name}</td>
                         <td className="py-4 px-6">{order.quantity}개</td>
                         <td className="py-4 px-6 font-semibold text-green-400">
-                          {order.total_price.toLocaleString()}원
+                          {(order.total_price || 0).toLocaleString()}원
                         </td>
                         <td className="py-4 px-6">
                           <span className={`status-badge ${statusInfo.className}`}>
