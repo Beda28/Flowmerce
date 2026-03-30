@@ -25,8 +25,10 @@ async def getProductList(db: AsyncSession, *, pid: str = None, page: int = 1, st
         if result and result.get("category"):
             result = dict(result)
             if isinstance(result["category"], str):
-                import json
-                result["category"] = json.loads(result["category"])
+                try:
+                    result["category"] = json.loads(result["category"])
+                except (json.JSONDecodeError, ValueError):
+                    result["category"] = []
             elif not isinstance(result["category"], list):
                 result["category"] = []
         return result
