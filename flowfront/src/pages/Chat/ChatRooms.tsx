@@ -18,8 +18,25 @@ const ChatRooms = () => {
 
   useEffect(() => {
     const loadRooms = async () => {
-      const res = await getChatRooms()
-      setRooms(res.data.result || [])
+      try {
+        const res = await getChatRooms()
+        const rawData = res.data.result || res.data || []
+        
+        const formattedData = rawData.map((item: any) => {
+          const roomBase = item.ChatRoom || item
+          return {
+            room_id: roomBase.room_id,
+            pid: roomBase.pid,
+            product_name: item.product_name || item.name,
+            price: item.price,
+            image: item.image
+          }
+        })
+        
+        setRooms(formattedData)
+      } catch (e) {
+        console.error(e)
+      }
     }
     loadRooms()
   }, [])
@@ -39,15 +56,19 @@ const ChatRooms = () => {
           {rooms.length > 0 ? (
             rooms.map((room, index) => (
               <div
-                key={room.room_id}
+                key={room.room_id || index}
                 className="glass rounded-xl p-5 hover:bg-muted/30 cursor-pointer transition-all group animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
-                onClick={() => navigate(`/chat/${room.room_id}`)}
+                onClick={() => {
+                  if (room.room_id) {
+                    navigate(`/chat/${room.room_id}`)
+                  }
+                }}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0 border border-white/5">
                     {room.image ? (
-                      <img src={`/uploads/${room.image}`} alt={room.product_name} className="w-full h-full object-cover" />
+                      <img src={`/uploads/${room.image}`} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-8 w-8 text-muted-foreground opacity-30" />
@@ -55,17 +76,17 @@ const ChatRooms = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold group-hover:text-primary transition-colors truncate max-w-[200px]">
                       {room.product_name}
                     </h3>
-                    <p className="gradient-text font-bold mt-1">{room.price?.toLocaleString()}원</p>
+                    <p className="gradient-text font-bold mt-1">{(room.price || 0).toLocaleString()}원</p>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
               </div>
             ))
           ) : (
-            <div className="glass rounded-2xl p-16 text-center">
+            <div className="glass rounded-2xl p-16 text-center border border-white/10">
               <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="h-8 w-8 text-muted-foreground opacity-50" />
               </div>

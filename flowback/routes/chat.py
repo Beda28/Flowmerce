@@ -1,20 +1,18 @@
+import json
+from datetime import datetime
+from typing import Dict, List
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
-from db import engine, mongo
+from db import engine
 from repository import chat as chat_repo
 from utils import token
-from uuid import uuid4
-from datetime import datetime
-import json
 
 router = APIRouter()
+active_connections: Dict[str, List[WebSocket]] = {}
 
 class ChatRoomCreate(BaseModel):
     pid: str
-
-class ChatMessage(BaseModel):
-    message: str
 
 @router.post('/room')
 async def create_chat_room(data: ChatRoomCreate, db: AsyncSession = Depends(engine.get_db), payload: dict = Depends(token.CheckLogin)):
@@ -30,38 +28,37 @@ async def get_chat_rooms(db: AsyncSession = Depends(engine.get_db), payload: dic
 @router.get('/room/{room_id}/messages')
 async def get_messages(room_id: str, payload: dict = Depends(token.CheckLogin)):
     uid = payload.get("uuid")
+    await chat_repo.markAsRead(room_id, uid)
     result = await chat_repo.getMessages(room_id, uid)
     return {"result": result}
 
 @router.websocket('/ws/{room_id}')
 async def websocket_chat(websocket: WebSocket, room_id: str):
     await websocket.accept()
-    client_id = None
+    if room_id not in active_connections:
+        active_connections[room_id] = []
+    active_connections[room_id].append(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            try:
-                msg_data = json.loads(data)
-                
-                if msg_data.get("type") == "auth":
-                    client_id = msg_data.get("uid")
-                    await websocket.send_text(json.dumps({"type": "auth_success", "uid": client_id}))
+            raw_data = await websocket.receive_text()
+            data = json.loads(raw_data)
+            if data.get("type") == "auth": continue
+            uid, message = data.get("uid"), data.get("message")
+            if not uid or not message: continue
+            is_read = len(active_connections[room_id]) >= 2
+            await chat_repo.saveMessage(room_id, uid, message, is_read)
+            payload = {
+                "type": "new_message",
+                "sender_uid": uid,
+                "message": message,
+                "created_at": datetime.utcnow().isoformat(),
+                "is_read": is_read
+            }
+            for conn in active_connections[room_id]:
+                try:
+                    await conn.send_text(json.dumps(payload))
+                except:
                     continue
-                
-                uid = msg_data.get("uid")
-                message = msg_data.get("message")
-                
-                if not uid or not message:
-                    await websocket.send_text(json.dumps({"type": "error", "message": "유효하지 않은 데이터입니다."}))
-                    continue
-                    
-                await chat_repo.saveMessage(room_id, uid, message)
-                await websocket.send_text(json.dumps({"type": "success"}))
-            except json.JSONDecodeError:
-                await websocket.send_text(json.dumps({"type": "error", "message": "잘못된 형식의 데이터입니다."}))
-            except Exception as e:
-                await websocket.send_text(json.dumps({"type": "error", "message": "메시지 전송에 실패했습니다."}))
     except WebSocketDisconnect:
-        pass
-    except Exception as e:
-        pass
+        if websocket in active_connections[room_id]:
+            active_connections[room_id].remove(websocket)

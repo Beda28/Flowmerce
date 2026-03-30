@@ -31,4 +31,6 @@ starlette==0.52.1
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uuid==1.30
-uvicorn==0.41.0
+uvicorn[standard]==0.34.0
+websockets==14.2
+wsproto==1.2.0
