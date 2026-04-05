@@ -108,7 +108,7 @@ const ProductPage = () => {
                 key={product.pid}
                 className="card-elevated overflow-hidden group animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
-                onClick={() => navigate(`/product/${product.pid}`)}
+                onClick={() => navigate(`/product/${pageNum}/${product.pid}`)}
               >
                 <div className="aspect-square relative overflow-hidden bg-muted">
                   {product.image ? (
@@ -171,7 +171,7 @@ const ProductPage = () => {
         </div>
 
         <div className="mt-12">
-          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/product" />
+          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/product/" />
         </div>
       </main>
     </div>

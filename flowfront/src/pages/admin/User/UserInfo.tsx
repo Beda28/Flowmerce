@@ -23,13 +23,14 @@ interface OrderItem {
 }
 
 const AdminUserInfo = () => {
-  const { id: uid } = useParams<{ id: string }>()
+  const { page: pageNum, id: uid } = useParams<{ page: string; id: string }>()
   const [user, setUser] = useState<User>()
   const [orders, setOrders] = useState<OrderItem[]>([])
   const [balanceMode, setBalanceMode] = useState(false)
   const [balanceAmount, setBalanceAmount] = useState("")
   const [balanceAction, setBalanceAction] = useState<"add" | "subtract">("add")
   const navigate = useNavigate()
+  const currentPage = Number(pageNum) || 1
 
   useEffect(() => {
     if (!uid) return
@@ -157,7 +158,7 @@ const AdminUserInfo = () => {
         </Card>
 
         <div className="flex justify-between mt-6">
-          <Button variant="outline" onClick={() => navigate("/admin/user")}>
+          <Button variant="outline" onClick={() => navigate(`/admin/user/${currentPage}`)}>
             목록으로
           </Button>
           <div className="flex gap-2">

@@ -1,7 +1,7 @@
 import client from "./client";
 
-export const getUserList = () => {
-  return client.get("/admin/user/list");
+export const getUserList = (page: number = 1) => {
+  return client.get(`/admin/user/list?page=${page}`);
 };
 
 export const getUserInfo = (uid: string) => {

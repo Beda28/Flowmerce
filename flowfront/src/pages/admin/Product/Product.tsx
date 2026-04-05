@@ -26,7 +26,7 @@ const AdminProductPage = () => {
   const [sort, setSort] = useState("newest")
 
   const LookProduct = (pid: string) => {
-    navigate(`/admin/product/${pid}`)
+    navigate(`/admin/product/${pageNum}/${pid}`)
   }
 
   const SearchSubmit = async () => {

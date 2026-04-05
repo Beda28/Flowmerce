@@ -13,12 +13,13 @@ interface ProductWithSeller extends Product {
 }
 
 const ProductInfo = () => {
-  const { id: pid } = useParams<{ id: string }>()
+  const { page: pageNum, id: pid } = useParams<{ page: string; id: string }>()
   const [product, setProduct] = useState<ProductWithSeller>()
   const [quantity, setQuantity] = useState(1)
   const navigate = useNavigate()
   const userId = getId()
   const isLoggedIn = userId !== null
+  const currentPage = Number(pageNum) || 1
 
   useEffect(() => {
     if (!pid) return
@@ -57,7 +58,7 @@ const ProductInfo = () => {
       <main className="container mx-auto px-6 pt-24 pb-12">
         <Button 
           variant="ghost" 
-          onClick={() => navigate("/product")} 
+          onClick={() => navigate(`/product/${currentPage}`)} 
           className="mb-8 hover:bg-muted/50"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

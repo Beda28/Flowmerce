@@ -12,10 +12,13 @@ class BalanceUpdate(BaseModel):
     amount: int
 
 @router.get('/list')
-async def user_list(db: AsyncSession = Depends(engine.get_db), _ = Depends(token.CheckAdmin)):
-    result = await db.execute(select(model.User.uid, model.User.id, model.User.balance))
+async def user_list(page: int = 1, db: AsyncSession = Depends(engine.get_db), _ = Depends(token.CheckAdmin)):
+    offset = (page - 1) * 20
+    result = await db.execute(select(model.User.uid, model.User.id, model.User.balance).limit(20).offset(offset))
     users = result.mappings().all()
-    return {"result": users}
+    count_result = await db.execute(select(model.User))
+    total = len(count_result.all())
+    return {"result": users, "total_count": total}
 
 @router.get('/{uid}')
 async def user_info(uid: str, db: AsyncSession = Depends(engine.get_db), _ = Depends(token.CheckAdmin)):

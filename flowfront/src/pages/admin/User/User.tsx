@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import AdminHeader from "@/components/AdminHeader"
 import { getUserList } from "@/api/user"
+import PageNation from "@/components/PageNation"
 import { Users, User as UserIcon, CreditCard, ChevronRight } from "lucide-react"
 
 interface User {
@@ -11,20 +12,25 @@ interface User {
 }
 
 const AdminUserPage = () => {
+  const { page } = useParams()
+  const pageNum = Number(page) || 1
+  const [totalcount, setTotalCount] = useState(0)
   const [users, setUsers] = useState<User[]>([])
   const navigate = useNavigate()
+  const pageCount = Math.ceil(totalcount / 20) || 1
 
   const LookUser = (uid: string) => {
-    navigate(`/admin/user/${uid}`)
+    navigate(`/admin/user/${pageNum}/${uid}`)
   }
 
   useEffect(() => {
     const ListSetting = async () => {
-      const res = await getUserList()
+      const res = await getUserList(pageNum)
       setUsers(res.data.result || [])
+      setTotalCount(res.data.total_count || 0)
     }
     ListSetting()
-  }, [])
+  }, [pageNum])
 
   return (
     <div className="min-h-screen gradient-bg">
@@ -37,7 +43,7 @@ const AdminUserPage = () => {
                 유저 관리
               </span>
             </h1>
-            <p className="text-muted-foreground mt-2">전체 {users.length}명</p>
+            <p className="text-muted-foreground mt-2">전체 {totalcount}명</p>
           </div>
         </div>
 
@@ -100,6 +106,8 @@ const AdminUserPage = () => {
             </table>
           </div>
         </div>
+
+        <PageNation pageLength={pageCount} pageIndex={pageNum} url="/admin/user/" />
       </main>
     </div>
   )

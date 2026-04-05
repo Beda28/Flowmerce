@@ -58,3 +58,21 @@ CREATE TABLE IF NOT EXISTS chat_rooms (
     seller_uid char(36) NOT NULL,
     created_at datetime NOT NULL
 );
+
+-- Performance Indexes
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_balance ON users(balance);
+CREATE INDEX idx_product_seller ON product(seller_uid);
+CREATE INDEX idx_product_date ON product(date DESC);
+CREATE INDEX idx_product_price ON product(price);
+CREATE INDEX idx_board_writer ON board(writer);
+CREATE INDEX idx_board_date ON board(date DESC);
+CREATE INDEX idx_cart_uid ON cart(uid);
+CREATE INDEX idx_cart_pid ON cart(pid);
+CREATE INDEX idx_orders_uid ON orders(uid);
+CREATE INDEX idx_orders_pid ON orders(pid);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_date ON orders(date DESC);
+CREATE INDEX idx_chat_pid ON chat_rooms(pid);
+CREATE INDEX idx_chat_buyer ON chat_rooms(buyer_uid);
+CREATE INDEX idx_chat_seller ON chat_rooms(seller_uid);

@@ -24,7 +24,7 @@ const AdminBoardPage = () => {
   const [type, setType] = useState("board.title")
 
   const LookPost = (uuid: string) => {
-    navigate(`/admin/board/${uuid}`)
+    navigate(`/admin/board/${pageNum}/${uuid}`)
   }
 
   const SearchSubmit = async () => {

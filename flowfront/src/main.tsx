@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import "./index.css";
 import Login from "./pages/auth/Login.tsx";
 import Index from "./pages/Index.tsx";
@@ -37,29 +37,34 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/mypage" element={<MyPage />} />
-      <Route path="/product" element={<Product />} />
-      <Route path="/product/:id" element={<ProductInfo />} />
+      <Route path="/product" element={<Navigate to="/product/1" replace />} />
+      <Route path="/product/:page" element={<Product />} />
+      <Route path="/product/:page/:id" element={<ProductInfo />} />
       <Route path="/product/write" element={<ProductWrite />} />
       <Route path="/product/update/:id" element={<ProductWrite />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/chat" element={<ChatRooms />} />
       <Route path="/chat/:roomId" element={<ChatRoom />} />
-      <Route path="/board" element={<Board />} />
-      <Route path="/board/:id" element={<BoardInfo />} />
+      <Route path="/board" element={<Navigate to="/board/1" replace />} />
+      <Route path="/board/:page" element={<Board />} />
+      <Route path="/board/:page/:id" element={<BoardInfo />} />
       <Route path="/board/write" element={<BoardWrite />} />
       <Route path="/board/update/:id" element={<BoardUpdate />} />
       <Route path="/board/delete/:id" element={<BoardDelete />} />
-      <Route path="/admin/product" element={<AdminProduct />} />
-      <Route path="/admin/product/:id" element={<AdminProductInfo />} />
+      <Route path="/admin/product" element={<Navigate to="/admin/product/1" replace />} />
+      <Route path="/admin/product/:page" element={<AdminProduct />} />
+      <Route path="/admin/product/:page/:id" element={<AdminProductInfo />} />
       <Route path="/admin/product/write" element={<AdminProductWrite />} />
       <Route path="/admin/product/update/:id" element={<AdminProductWrite />} />
       <Route path="/admin/product/delete/:id" element={<AdminProductDelete />} />
-      <Route path="/admin/board" element={<AdminBoard />} />
-      <Route path="/admin/board/:id" element={<AdminBoardInfo />} />
+      <Route path="/admin/board" element={<Navigate to="/admin/board/1" replace />} />
+      <Route path="/admin/board/:page" element={<AdminBoard />} />
+      <Route path="/admin/board/:page/:id" element={<AdminBoardInfo />} />
       <Route path="/admin/board/update/:id" element={<AdminBoardUpdate />} />
       <Route path="/admin/board/delete/:id" element={<AdminBoardDelete />} />
-      <Route path="/admin/user" element={<AdminUser />} />
-      <Route path="/admin/user/:id" element={<AdminUserInfo />} />
+      <Route path="/admin/user" element={<Navigate to="/admin/user/1" replace />} />
+      <Route path="/admin/user/:page" element={<AdminUser />} />
+      <Route path="/admin/user/:page/:id" element={<AdminUserInfo />} />
       <Route path="/admin/user/update/:id" element={<AdminUserUpdate />} />
       <Route path="/admin/user/delete/:id" element={<AdminUserDelete />} />
       <Route path="/admin/order" element={<AdminOrder />} />

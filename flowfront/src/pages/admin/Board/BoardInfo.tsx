@@ -16,9 +16,10 @@ interface Board {
 }
 
 const AdminBoardInfo = () => {
-  const { id: bid } = useParams<{ id: string }>()
+  const { page: pageNum, id: bid } = useParams<{ page: string; id: string }>()
   const [post, setPost] = useState<Board>()
   const navigate = useNavigate()
+  const currentPage = Number(pageNum) || 1
 
   useEffect(() => {
     if (!bid) return
@@ -33,7 +34,7 @@ const AdminBoardInfo = () => {
     <div className="min-h-screen bg-background">
       <AdminHeader />
       <main className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
-        <Button variant="ghost" onClick={() => navigate("/admin/board")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate(`/admin/board/${currentPage}`)} className="mb-6">
           ← 목록으로
         </Button>
 
@@ -59,7 +60,7 @@ const AdminBoardInfo = () => {
             </div>
 
             <div className="flex justify-between items-center mt-8 pt-6 border-t">
-              <Button variant="outline" onClick={() => navigate("/admin/board")}>
+              <Button variant="outline" onClick={() => navigate(`/admin/board/${currentPage}`)}>
                 목록으로
               </Button>
               <div className="flex gap-3">

@@ -9,11 +9,12 @@ import { Edit, Trash2, Eye, Calendar } from "lucide-react"
 import type { Board } from "@/types/board"
 
 const BoardInfo = () => {
-  const { id: bid } = useParams<{ id: string }>()
+  const { page: pageNum, id: bid } = useParams<{ page: string; id: string }>()
   const [board, setBoard] = useState<Board>()
   const navigate = useNavigate()
   const userId = getId()
   const isLoggedIn = userId !== null
+  const currentPage = Number(pageNum) || 1
 
   useEffect(() => {
     if (!bid) return
@@ -30,7 +31,7 @@ const BoardInfo = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
-        <Button variant="ghost" onClick={() => navigate("/board")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate(`/board/${currentPage}`)} className="mb-6">
           ← 목록으로
         </Button>
 

@@ -18,9 +18,10 @@ interface Product {
 }
 
 const AdminProductInfo = () => {
-  const { id: pid } = useParams<{ id: string }>()
+  const { page: pageNum, id: pid } = useParams<{ page: string; id: string }>()
   const [product, setProduct] = useState<Product>()
   const navigate = useNavigate()
+  const currentPage = Number(pageNum) || 1
 
   useEffect(() => {
     if (!pid) return
@@ -71,7 +72,7 @@ const AdminProductInfo = () => {
                 <p className="text-muted-foreground">{product?.description || "상품 설명이 없습니다."}</p>
 
                 <div className="flex gap-3 pt-4">
-                  <Button variant="outline" onClick={() => navigate("/admin/product")}>
+                  <Button variant="outline" onClick={() => navigate(`/admin/product/${currentPage}`)}>
                     목록으로
                   </Button>
                   <Button onClick={() => navigate(`/admin/product/update/${product?.pid}`)}>

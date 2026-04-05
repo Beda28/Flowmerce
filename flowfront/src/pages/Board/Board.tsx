@@ -89,7 +89,7 @@ const BoardPage = () => {
                 key={board.bid}
                 className="glass rounded-xl p-5 hover:bg-muted/30 cursor-pointer transition-all group animate-fade-in"
                 style={{ animationDelay: `${index * 50}ms` }}
-                onClick={() => navigate(`/board/${board.bid}`)}
+                onClick={() => navigate(`/board/${pageNum}/${board.bid}`)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
@@ -130,7 +130,7 @@ const BoardPage = () => {
         </div>
 
         <div className="mt-8">
-          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/board" />
+          <PageNation pageLength={pageCount} pageIndex={pageNum} url="/board/" />
         </div>
       </main>
     </div>
